@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>F:\WorkDir\CSCMaster\CSCMasterAPI\bin\Release\net8.0\publish\</_PublishTargetUrl>
+    <History>True|2026-03-05T05:12:24.2455008Z||;True|2026-02-22T23:23:06.3923399+05:30||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=Retinue\SQLEXPRESS%3bDatabase=CSCMaster%3bUser Id=sa%3bPassword=Retinue123!%40#%3bEncrypt=False%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

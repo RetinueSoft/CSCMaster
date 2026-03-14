@@ -1,0 +1,124 @@
+[
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "Auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "CSCMasterAPI.Models.LoginModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.AuthController",
+    "Method": "Refresh",
+    "RelativePath": "Auth/refresh",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "tokens",
+        "Type": "CSCMasterAPI.Models.TokenRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.EnrolmentsController",
+    "Method": "GetMember",
+    "RelativePath": "Enrolments/GetMember",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "stationID",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.EnrolmentsController",
+    "Method": "MyDistrictMembers",
+    "RelativePath": "Enrolments/MyDistrictMembers",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "input",
+        "Type": "CSCMasterAPI.Models.MyDistrictMemberEnrolmentModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.EnrolmentsController",
+    "Method": "MyDistricts",
+    "RelativePath": "Enrolments/MyDistricts",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "input",
+        "Type": "CSCMasterAPI.Models.MyDistrictEnrolmentModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.EnrolmentsController",
+    "Method": "MyMemberEnrolments",
+    "RelativePath": "Enrolments/MyMemberEnrolments",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "input",
+        "Type": "CSCMasterAPI.Models.MyMemberEnrolmentModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CSCMasterAPI.Controllers.EnrolmentsController",
+    "Method": "UploadEnrolmentData",
+    "RelativePath": "Enrolments/UploadEnrolmentData",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Member",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Date",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "File",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

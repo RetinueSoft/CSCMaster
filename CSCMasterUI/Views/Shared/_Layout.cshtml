@@ -1,0 +1,118 @@
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Configuration["AppSettings:ApplicationName"]</title>
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker.min.css" />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/commoncontrol.css" />
+    <link rel="stylesheet" href="~/css/menu.css" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="~/img/logo.png">
+</head>
+<body ng-app="app">
+    <header ng-controller="NavBarController">
+        <nav class="navbar navbar-expand-sm mb-3" ng-if="user">
+            <div class="container-fluid">
+                <img src="~/img/user.jpg" class="rounded-circle me-2" alt="User" width="35" height="35">
+                <a class="navbar-brand" ng-href="/Dashboard/Index?userRole={{user.role}}">
+                    <span class="text-white">{{user.name}}</span>
+                </a>
+                <div class="d-flex align-items-center ms-auto">
+                    @* <a class="text-white ms-auto me-3" ng-click="toggleMenuNavigator()" href>
+                        <i class="fa-solid fa-location-arrow"></i>
+                    </a> *@
+
+                    <div class="collapse navbar-collapse" id="navbarUser">
+                        <ul class="navbar-nav ms-auto d-flex align-items-center">
+                            <li class="nav-item me-3 position-relative">
+                                <a href class="nav-link" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell-fill fs-5"></i>
+                                    <span class="position-absolute translate-middle badge rounded-pill">
+                                        {{alertMessage.length}}
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end alert-dropdown">
+                                    <li ng-if="alertMessage.length === 0">
+                                        <span class="dropdown-item-text">No alerts</span>
+                                    </li>
+                                    <li ng-repeat="msg in alertMessage">
+                                        <div class="dropdown-item d-flex justify-content-between align-items-start">
+                                            <div class="alert-text">
+                                                <strong>{{ msg.title }}</strong><br>
+                                                <small class="text-muted">{{ msg.text }}</small>
+                                            </div>
+                                            <button type="button" class="btn-close ms-2" aria-label="Close" ng-click="removeAlert(msg)"></button>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <a class="nav-link text-white d-flex align-items-center" ng-click="logout()">
+                                    <i class="bi bi-box-arrow-right fs-5 me-1"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarUser"
+                        aria-controls="navbarUser" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid page">
+        <main role="main" class="pb-3">
+            @RenderBody()
+            <partial name="Menu" />
+        </main>
+    </div>
+    
+    <footer class="footer mt-5" ng-controller="NavBarController">
+        <div class="container-fluid" ng-if="user">
+            <hr />
+            <div class="footer-bottom mt-3">
+                &copy; 2026 - Retinue - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/angular.js/angular.min.js"></script>
+    <script src="~/js/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-tpls.js"></script>
+
+    <script src="~/AppJs/Base/App.js"></script>
+    <script src="~/AppJs/Base/AppUtil.js"></script>
+    <script src="~/AppJs/Base/BaseService.service.js"></script>
+    <script src="~/AppJs/Base/Directives.controller.js"></script>
+    <script src="~/AppJs/Base/PopupModal.service.js"></script>
+
+    <script src="~/AppJs/UserAccount/NavBar.controller.js"></script>
+    <script src="~/AppJs/UserAccount/UserAccount.service.js"></script>
+    <script src="~/AppJs/UserAccount/UserLoginAccount.controller.js"></script>
+
+    <script src="~/AppJs/Entrolment/UploadEntrolment.controller.js"></script>
+    <script src="~/AppJs/Entrolment/EntrolmentView.controller.js"></script>
+    <script src="~/AppJs/Entrolment/Entrolment.service.js"></script>
+    <script>
+        const apiBaseUrl = '@Configuration["AppSettings:ApiBaseUrl"]';
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "EntrolmentUpload";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row" ng-controller="UploadEntrolmentController">
+    <div class="offset-md-1 col-md-5">
+        <div class="card shadow-sm p-4">
+            <h5 class="mb-3">
+                <i class="bi bi-search"></i> Find Station
+            </h5>
+            <div class="mb-3" id="stationId">
+                <label class="form-label">Enter Station ID:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="input.stationId" ng-keypress="($event.which === 13) && featchMember(input.stationId)">
+                    <button class="btn" ng-click="featchMember(input.stationId)">
+                        <i class="bi bi-search"></i> Fetch
+                    </button>
+                </div>
+            </div>
+            <div class="card shadow-sm p-4">
+                <h6 class="mb-3">
+                    <i class="bi bi-info-circle"></i> Station Information
+                </h6>
+
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold">Name:</div>
+                    <div class="col-8">{{input.member.name}}</div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold">District:</div>
+                    <div class="col-8">{{input.member.district}}</div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-4 fw-bold">Block:</div>
+                    <div class="col-8">{{input.member.block}}</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4 fw-bold">Mode:</div>
+                    <div class="col-8">
+                        <div class="col-8">{{input.member.name}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5 mt-sm-3 mt-lg-0">
+        <div class="card shadow-sm p-4">
+            <h5 class="mb-4">
+                <i class="bi bi-upload"></i> Upload File
+            </h5>
+            <div class="mb-3">
+                <label class="form-label">Choose CSV File:</label>
+                <input type="file" id="fileInput" class="form-control" file-model="input.file">
+            </div>
+
+            <button class="btn btn-success w-100" ng-disabled="!input.member || !input.file" ng-click="uploadFile()">
+                <i class="bi bi-cloud-upload"></i> Upload Data
+            </button>
+        </div>
+
+    </div>
+</div>

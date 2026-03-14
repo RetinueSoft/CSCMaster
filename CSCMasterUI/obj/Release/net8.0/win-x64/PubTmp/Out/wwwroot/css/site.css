@@ -1,0 +1,161 @@
+:root {
+    --bgclr: #FFFFFF;
+    --ribbonclr: #009688;
+    --ribbontxtclr: #FFFFFF;
+    --txtclr: #000000;
+    --btnclr: #EC6602;
+    --btnhoverclr: #A04501;
+    --btntxtclr: #FFFFFF;
+    --highliterclr: #0a58ca;
+    --linkclr: #BFBFBF;
+    --iconfontsize: 16px;
+    --t1font: 12px;
+    --fontsize: 16px;
+    --h1font: 24px;
+    --h2font: 22px;
+    --h3font: 20px;
+    --alertDropDownWidth: 30rem;
+    --errorTagClr: #FE0495;
+    --errortxtClr: #FFFFFF;
+    --graybtnhoverclr: #BFBFBF;
+}
+
+@media (max-width: 768px) {
+    :root {
+        --iconfontsize: 12px;
+        --t1font: 10px;
+        --fontsize: 14px;
+        --h1font: 22px;
+        --h2font: 20px;
+        --h3font: 18px;
+        --alertDropDownWidth: 15rem;
+    }
+}
+
+html {
+    font-size: var(--fontsize);
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    background-color:var(--bgclr);
+    margin-bottom: 60px;
+}
+
+.vh-95 {
+    min-height: 95vh !important;
+}
+.mw-9 {
+    max-width: 90%
+}
+.modal-content {
+    background-color: var(--bgclr);
+}
+.modal-header {
+    font-size: var(--h2font);
+}
+
+.rem6dot5 {
+    width: 6.5rem
+}
+
+
+.enable-error-text {
+    position: relative; /* Needed for positioning the pseudo-element */
+    visibility: visible;
+    color: var(--errortxtClr);
+    padding: 1% 2%;
+    background-color: var(--errorTagClr);
+    display: inline-block; /* Ensures the pseudo-element positions properly */
+}
+
+    .enable-error-text::before {
+        content: "";
+        position: absolute;
+        bottom: 100%; /* Position above the error box */
+        left: 20px; /* Adjust this value as needed */
+        border-width: 0 6px 6px 6px;
+        border-style: solid;
+        border-color: transparent transparent #d5006e transparent;
+    }
+
+.row .chkgrp-inline {
+    width: auto !important; /* undo 100% width */
+    display: inline-flex;
+    align-items: center;
+    margin-right: 12px;
+}
+fieldset {
+    border: 1px solid #ced4da;
+}
+    fieldset > * {
+        padding: 0px 0px 0px 8px;
+    }
+legend {
+    all: unset;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+.tAlignCenter {
+    text-align: center;
+}
+
+iconbtngrp.active > button:first-child {
+    background-color: transparent !important;
+    color: var(--btnclr) !important;
+    border-bottom: 2px solid var(--btnclr) !important;
+}
+
+.tag {
+    padding: 2px 6px;
+    font-size: var(--t1font);
+    border-radius: 6px;
+    color: var(--bgclr);
+    background-color: var(--ribbonclr);
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+.fixed-img-div {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Fix table header and footer borders */
+.postable thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bgclr);
+    border-top: 2px solid #dee2e6; /* Show top border */
+    box-shadow: 0 2px 0 #dee2e6; /* Simulate bottom border under header */
+}
+
+.postable tfoot tr {
+    position: sticky;
+    bottom: 0;
+    background: var(--bgclr);
+    border-bottom: 2px solid #dee2e6; /* Show bottom border */
+    box-shadow: 0 -2px 0 #dee2e6; /* Simulate top border above footer */
+}
+.postable tfoot {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    z-index: 2;
+}

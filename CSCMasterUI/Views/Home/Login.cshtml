@@ -1,0 +1,37 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div ng-controller="UserLoginAccountController" style="width:100%;">
+    <div class="row d-flex justify-content-center align-items-center vh-95">
+        <div class="col-lg-4">
+            <div>
+                <div class="p-4">
+                    <h3 class="text-uppercase text-center">Login</h3>
+
+                    <mobilegrp id="userMobileGroupLogin" label="Mobile" placeholder="Mobile Number"
+                               model="user.mobile" required></mobilegrp>
+
+                    <passgrp id="userPasswordGroupLogin" label="Password"
+                             model="user.password" onenter="login()" required></passgrp>
+
+                    <div id='divet_loginerror' class="d-flex">
+                        <small id='et_loginerror'></small>
+                    </div>
+
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="button" class="btn btn-dark" id="userLoginBtn" ng-click="login()">
+                            Login
+                        </button>
+                    </div>                    
+                    <div class="row mt-3">
+                        <div class="col-md-12 text-center">
+                            @* <a href="" ng-href="/Home/ForgotPassword" class="fw-bold text-body text-right"><u>Forgot Password</u></a> *@
+                            <a class="fw-bold text-body text-right"><u>Forgot Password</u></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

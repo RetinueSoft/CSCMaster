@@ -1,0 +1,153 @@
+﻿@{
+    ViewData["Title"] = "EntrolmentUpload";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow p-4 card-container" ng-controller="EntrolmentViewController">
+    <div class="row">
+        <div class="col-md-4">
+            <label>From:</label>
+            <input type="date" class="form-control" ng-model="input.fromDate">
+        </div>
+        <div class="col-md-4">
+            <label>To:</label>
+            <input type="date" class="form-control" ng-model="input.toDate">
+        </div>
+        <div class="col-md-4">
+            <label class="invisible">btn</label>
+            <button class="btn form-control" ng-click="loadDistrict()">Laptop Data</button>
+        </div>
+    </div>
+
+    <h2 class="mt-4 mb-4">View Enrolments</h2>
+    @* <div class="table-responsive-lg">
+        <paged-table headers="[
+                 { title: 'District', width: '90%'},
+                 { title: 'Count', width: '10%' }]"
+                     fetch-method="listItems(pageNumber, successFun)"
+                     row-template="disRowTemplate.html"
+                     context="this"
+                     on-init="onPagedTableInit(api)">
+        </paged-table>
+
+        <script type="text/ng-template" id="disRowTemplate.html">
+            <td class="fw-semibold">{{item.disctrict}}</td>
+                    <td>{{item.count}}</td>
+                    <td colspan="2">
+                            <div class="row mt-4">
+                                <div class="col-md-3"> <b>Districts: 0</b> </div>
+                                <div class="col-md-3"> <b>Users: 7/0</b></div>
+                                <div class="col-md-3">
+                                    <b>Mobile Count: 0</b>
+                                    <div class="small text-muted mt-2">
+                                        Amount: 0 / GST: 0 / CC: 0
+                                    </div>
+                                </div>
+                                <div class="col-md-3"><b>Child Count: 0</b></div>
+                            </div>
+                        </td>
+        </script>
+    </div> *@
+    <div class="row">
+        <table class="table table-bordered table-responsive-lg">
+            <thead class="table-header"> <tr><th>District</th> <th width="10%">Count</th></tr> </thead>
+            <tbody >
+                <tr ng-repeat="d in districts">
+                    <td class="fw-semibold">
+                        <span>{{d.memExp ? '(-) ' : '(+) '}}</span>
+                        <a href ng-click="loadMember(d);">{{d.name}}</a>
+                        <table class="table table-bordered table-responsive-lg mt-3" ng-show="d.members.length>0 && d.memExp">
+                            <thead class="table-header"> <tr><th width="35%">Name</th><th>Station Id</th><th>Block</th><th>Mobile</th><th>Count</th><th>Amount+GST=Total</th></tr> </thead>
+                            <tbody>
+                                <tr ng-repeat-start="m in d.members">
+                                    <td class="fw-semibold">
+                                        <span>{{m.detExp ? '(-) ' : '(+) '}}</span>
+                                        <a href ng-click="loadMemberEntrolment(m);">{{m.name}}</a>
+                                    </td>
+                                    <td>{{m.stationId}}</td>
+                                    <td>{{m.block}}</td>
+                                    <td>{{m.mobile}}</td>
+                                    <td>
+                                        <a href ng-click="m.selectedType=undefined" ng-class="{'fw-bold': !m.selectedType}">T:{{m.totalCount}}</a> =>
+                                        <a href ng-click="m.selectedType='C'" ng-class="{'fw-bold': m.selectedType === 'C'}">C:{{m.childCount}}, </a>
+                                        <a href ng-click="m.selectedType='M'" ng-class="{'fw-bold': m.selectedType === 'M'}">M:{{m.mobileCount}}, </a>
+                                        <a href ng-click="m.selectedType='BU'" ng-class="{'fw-bold': m.selectedType === 'BU'}">BU:{{m.bioUpdateCount}}, </a>
+                                        <a href ng-click="m.selectedType='U'" ng-class="{'fw-bold': m.selectedType === 'U'}">U:{{m.updateCount}}, </a>
+                                        <a href ng-click="m.selectedType='N'" ng-class="{'fw-bold': m.selectedType === 'N'}">N:{{m.newCount}}, </a>
+                                    </td>
+                                    <td>{{m.amount}} + {{m.gst}} = {{m.total}}</td>
+                                </tr>
+                                <tr ng-repeat-end ng-show="m.memberEntrolments.length>0 && m.detExp">
+                                    <td colspan="6">
+                                        <table class="table table-bordered table-responsive-lg mt-3">
+                                            <thead class="table-header"> <tr><th>UploadedDate</th><th>EID</th><th>Date Time</th><th>Type</th><th width="20%">Name</th><th>Amount+GST=Total</th></tr> </thead>
+                                            <tbody>
+                                                <tr ng-repeat="e in m.memberEntrolments | filter:{type: m.selectedType || undefined}:true">
+                                                    <td>{{e.uploadedDate | dateDisplay}}</td>
+                                                    <td>{{e.eid}}</td>
+                                                    <td>{{e.eidDate | dateTimeDisplay}}</td>
+                                                    <td>{{e.type}}</td>
+                                                    <td class="fw-semibold">{{e.childName}}</td>
+                                                    <td>{{e.amount}} + {{e.gst}} = {{e.total}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>{{d.totalCount}}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">
+                        <div class="row mt-4">
+                            <div class="col-sm-4 col-lg-2"> <b>Districts: {{districts.length}}</b> </div>
+                            <div class="col-sm-4 col-lg-2"> <b>Users:  {{(districts | sumBy:'userCount') }} / {{(districts | sumBy:'userEntrolledCount') }}</b></div>
+                            <div class="col-sm-12 col-lg-8">
+                                <div>
+                                    <b>Total</b>: {{(districts | sumBy:'totalCount')}} [{{(districts | sumBy:'totalAmount')}}+{{(districts | sumBy:'totalGST')}}={{(districts | sumBy:'totalTotal')}}]
+                                    <b>Child</b>: {{(districts | sumBy:'childCount')}} ({{(districts | sumBy:'childAmount')}}+{{(districts | sumBy:'childGST')}}={{(districts | sumBy:'childTotal')}}),
+                                    <b>Mobile</b>: {{(districts | sumBy:'mobileCount')}} [{{(districts | sumBy:'mobileAmount')}}+{{(districts | sumBy:'mobileGST')}}={{(districts | sumBy:'mobileTotal')}}],
+                                    <b>Bio Update</b>: {{(districts | sumBy:'bioUpdateCount')}} [{{(districts | sumBy:'bioUpdateAmount')}}+{{(districts | sumBy:'bioUpdateGST')}}={{(districts | sumBy:'bioUpdateTotal')}}],
+                                    <b>New</b>: {{(districts | sumBy:'newCount')}} [{{(districts | sumBy:'newAmount')}}+{{(districts | sumBy:'newGST')}}={{(districts | sumBy:'newTotal')}}],
+                                    <b>Update</b>: {{(districts | sumBy:'updateCount')}} [{{(districts | sumBy:'updateAmount')}}+{{(districts | sumBy:'updateGST')}}={{(districts | sumBy:'updateTotal')}}],
+                                </div>
+                                @* <div>
+                                    <b>0rs</b>: {{(districts | sumBy:'mobileCount')}} [{{(districts | sumBy:'mobileAmount')}}+{{(districts | sumBy:'mobileGST')}}={{(districts | sumBy:'mobileTotal')}}],
+                                    <b>0rs</b>: {{(districts | sumBy:'newCount') + (districts | sumBy:'childCount')}}
+                                    [{{(districts | sumBy:'updateAmount') + districts | sumBy:'mobileAmount')}}+
+                                    {{(districts | sumBy:'updateGST')+ districts | sumBy:'mobileGST')}}=
+                                    {{(districts | sumBy:'updateTotal')+ districts | sumBy:'mobileTotal')}}]
+
+                                    <b>75rs</b>: {{(districts | sumBy:'updateCount') + (districts | sumBy:'mobileCount')}} 
+                                    [{{(districts | sumBy:'updateAmount') + districts | sumBy:'mobileAmount')}}+
+                                    {{(districts | sumBy:'updateGST')+ districts | sumBy:'mobileGST')}}=
+                                    {{(districts | sumBy:'updateTotal')+ districts | sumBy:'mobileTotal')}}]
+                                    <b>125rs</b>: {{(districts | sumBy:'childCount')}} ({{(districts | sumBy:'childAmount')}}+{{(districts | sumBy:'childGST')}}={{(districts | sumBy:'childTotal')}}),
+                                </div> *@
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <button class="btn form-control" onclick="location.href='@Url.Action("EntrolmentUpload", "Dashboard")'">Upload Data</button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn form-control">Summary Download</button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn form-control">Summary Download with GST</button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn form-control">Full Tab Download</button>
+        </div>
+    </div>
+</div>
