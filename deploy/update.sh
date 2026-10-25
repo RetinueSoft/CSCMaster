@@ -21,7 +21,7 @@ set -euo pipefail
 
 REPO="RetinueSoft/CSCMaster"
 BRANCH="postgres-migration"
-TOKEN_FILE="${GITHUB_TOKEN_FILE:-/root/.github_token_cscmaster}"
+TOKEN_FILE="${GITHUB_TOKEN_FILE:-/root/.github_token}"
 
 cd "$(dirname "$0")"
 BASE="$(pwd)"
