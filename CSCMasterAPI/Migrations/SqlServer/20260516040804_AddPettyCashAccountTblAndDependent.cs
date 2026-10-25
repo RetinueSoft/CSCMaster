@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace CSCMasterAPI.Migrations
+namespace CSCMasterAPI.Migrations.SqlServer
 {
     /// <inheritdoc />
     public partial class AddPettyCashAccountTblAndDependent : Migration

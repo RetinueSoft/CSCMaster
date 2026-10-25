@@ -94,7 +94,7 @@ namespace CSCMasterAPI.Persistence.Service
         private Customer? GetCustomer(int customerId) => _dbContext.Customer.FirstOrDefault(x => x.Id == customerId && x.CompanyId == _loginContext.CompanyId && x.BranchId == _loginContext.BranchId);
         public List<CustomerModel> GetCustomers(string searchBy) =>
             _dbContext.Customer.AsNoTracking().Where(x=> x.CompanyId == _loginContext.CompanyId && x.BranchId == _loginContext.BranchId)
-            .Where(x => searchBy.IsNullOrEmpty() || x.ContactInfoJSon.Contains(searchBy) || x.Name.Contains(searchBy))
+            .Where(x => string.IsNullOrEmpty(searchBy) || x.ContactInfoJSon.Contains(searchBy) || x.Name.Contains(searchBy))
             .Select(x => new CustomerModel()
             {
                 Id = x.Id,
@@ -153,7 +153,7 @@ namespace CSCMasterAPI.Persistence.Service
             if (pettyCashAccount.Customer == null)
                 throw new Exception("Invalid Customer or Customer not found.");
 
-            if (pettyCashAccount.Date > DateTime.Now)
+            if (pettyCashAccount.Date > CSCMasterAPI.Utils.AppClock.Now)
                 throw new Exception("Future date transaction cannot possible");
 
             if (pettyCashAccount.Items == null || pettyCashAccount.Items.Count == 0)
@@ -223,7 +223,7 @@ namespace CSCMasterAPI.Persistence.Service
             if (pettyCashAccount.Customer == null)
                 throw new Exception("Invalid Customer or Customer not found.");
 
-            if (pettyCashAccount.Date > DateTime.Now)
+            if (pettyCashAccount.Date > CSCMasterAPI.Utils.AppClock.Now)
                 throw new Exception("Future date transaction cannot possible");
 
             if (pettyCashAccount.Items == null || pettyCashAccount.Items.Count == 0)

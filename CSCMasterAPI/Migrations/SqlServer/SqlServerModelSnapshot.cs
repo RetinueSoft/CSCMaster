@@ -4,23 +4,20 @@ using CSCMasterAPI.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CSCMasterAPI.Migrations
+namespace CSCMasterAPI.Migrations.SqlServer
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260516141543_AddedCashSettlementInPettycashAccountTbl")]
-    partial class AddedCashSettlementInPettycashAccountTbl
+    partial class SqlServerModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.24")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -42,7 +39,7 @@ namespace CSCMasterAPI.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Company");
+                    b.ToTable("Company", (string)null);
 
                     b.HasData(
                         new
@@ -77,7 +74,7 @@ namespace CSCMasterAPI.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("CompanyBranch");
+                    b.ToTable("CompanyBranch", (string)null);
 
                     b.HasData(
                         new
@@ -126,7 +123,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customer", (string)null);
 
                     b.HasData(
                         new
@@ -154,7 +151,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("District");
+                    b.ToTable("District", (string)null);
 
                     b.HasData(
                         new
@@ -260,7 +257,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Entrollment");
+                    b.ToTable("Entrollment", (string)null);
                 });
 
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Item", b =>
@@ -287,7 +284,7 @@ namespace CSCMasterAPI.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Item");
+                    b.ToTable("Item", (string)null);
                 });
 
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Member", b =>
@@ -351,7 +348,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Member");
+                    b.ToTable("Member", (string)null);
 
                     b.HasData(
                         new
@@ -774,7 +771,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PettyCashAccount");
+                    b.ToTable("PettyCashAccount", (string)null);
                 });
 
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.PettyCashAccountItem", b =>
@@ -799,6 +796,10 @@ namespace CSCMasterAPI.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("decimal(18,6)");
 
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -808,7 +809,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("PettyCashAccountItem");
+                    b.ToTable("PettyCashAccountItem", (string)null);
                 });
 
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.User", b =>
@@ -853,7 +854,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
 
                     b.HasData(
                         new
@@ -906,7 +907,7 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasIndex("DistrictId");
 
-                    b.ToTable("UserDistrict");
+                    b.ToTable("UserDistrict", (string)null);
 
                     b.HasData(
                         new

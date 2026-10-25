@@ -1,0 +1,73 @@
+# CSCMaster on Linux: PostgreSQL 18 + API + UI.
+# HTTPS is handled by the server's main Caddy (rexl-api-backend), which proxies
+#   UI_PUBLIC_URL  -> UI_HOST_PORT  (default 8085)
+#   API_PUBLIC_URL -> API_HOST_PORT (default 8084)
+# On the server, update.sh downloads this file and keeps everything up to date:
+#   sudo ./update.sh
+# See DOCKER.md.
+
+name: cscmaster
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: cscmaster-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
+      POSTGRES_DB: "${POSTGRES_DB:-cscmaster}"
+      TZ: "${TZ:-UTC}"                     # only affects log timestamps
+    # The app decides which time zone each date column holds (CSCMasterAPI/Utils/AppClock.cs); keep the database on UTC.
+    command: ["postgres", "-c", "timezone=UTC"]
+    volumes:
+      - postgres-data:/var/lib/postgresql   # database files (PostgreSQL 18 image layout)
+      - ./backups:/backups                  # pg_dump backups (backup-db.sh, restore-db.sh)
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5435}:5432"   # only reachable from the server itself (SSH tunnel for pgAdmin/DBeaver)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-cscmaster}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api:
+    # Published by GitHub Actions (.github/workflows/docker-image.yml). Local build: docker compose build
+    image: ghcr.io/retinuesoft/cscmaster-api:${APP_IMAGE_TAG:-latest}
+    build:
+      context: .
+      target: api
+    container_name: cscmaster-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      DatabaseProvider: "Postgres"
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-cscmaster};Username=postgres;Password=${POSTGRES_PASSWORD}"
+      BusinessTimeZone: "${BUSINESS_TIME_ZONE:-Asia/Kolkata}"
+      Jwt__Key: "${JWT_KEY:?Set JWT_KEY in .env}"
+      Cors__AllowedOrigins__0: "${UI_PUBLIC_URL:?Set UI_PUBLIC_URL in .env}"
+      TZ: "${TZ:-UTC}"
+    ports:
+      - "${API_HOST_PORT:-8084}:8080"      # the server's main Caddy proxies API_PUBLIC_URL to this port
+
+  ui:
+    image: ghcr.io/retinuesoft/cscmaster-ui:${APP_IMAGE_TAG:-latest}
+    build:
+      context: .
+      target: ui
+    container_name: cscmaster-ui
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      AppSettings__ApiBaseUrl: "${API_PUBLIC_URL:?Set API_PUBLIC_URL in .env}"   # the browser calls the API here
+      TZ: "${TZ:-UTC}"
+    ports:
+      - "${UI_HOST_PORT:-8085}:8080"       # the server's main Caddy proxies UI_PUBLIC_URL to this port
+
+volumes:
+  postgres-data:

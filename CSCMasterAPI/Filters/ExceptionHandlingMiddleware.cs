@@ -23,7 +23,7 @@ namespace CSCMasterAPI.Utils
             }
             catch (Exception ex)
             {
-                File.AppendAllText("Exceptiolog.txt", "\n" + "Date:" + DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss") + ":" + ex.Message);
+                File.AppendAllText("Exceptiolog.txt", "\n" + "Date:" + CSCMasterAPI.Utils.AppClock.Now.ToString("dd-MM-yyyy HH:mm:ss") + ":" + ex.Message);
                 if (ex.InnerException != null)
                     File.AppendAllText("Exceptiolog.txt", "Inner:" + ex.InnerException);
                 File.AppendAllText("Exceptiolog.txt", "\n" + ex.StackTrace);

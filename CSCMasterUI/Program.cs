@@ -32,6 +32,18 @@ builder.Services.Configure<RazorViewEngineOptions>(o =>
 
 var app = builder.Build();
 
+// Behind the server's main Caddy (reverse proxy): use the original scheme and client IP.
+// No effect when there are no X-Forwarded-* headers.
+var forwardedHeaders = new Microsoft.AspNetCore.Builder.ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto |
+                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedHost
+};
+forwardedHeaders.KnownIPNetworks.Clear();   // the app is only reachable through the proxy
+forwardedHeaders.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeaders);
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
