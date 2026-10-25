@@ -15,8 +15,8 @@
 #   4. starts PostgreSQL and applies any new database migrations
 #   5. restarts the containers that changed
 #
-# GitHub token: read from /root/.github_token_cscmaster (scopes: repo, read:packages), readable only by root:
-#   echo '<token>' | sudo tee /root/.github_token_cscmaster >/dev/null && sudo chmod 600 /root/.github_token_cscmaster
+# GitHub token: read from /root/.github_token (scopes: repo, read:packages), readable only by root:
+#   echo '<token>' | sudo tee /root/.github_token >/dev/null && sudo chmod 600 /root/.github_token
 set -euo pipefail
 
 REPO="RetinueSoft/CSCMaster"

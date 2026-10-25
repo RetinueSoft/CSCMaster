@@ -22,15 +22,15 @@ and restarts. The server needs no git clone and never builds code.
 - Install Docker Engine with the compose plugin (https://docs.docker.com/engine/install/).
 - Point both domains' DNS **A records** at the server's public IP (the main Caddy serves them).
 - Do not open ports 8084/8085 to the internet: only the main Caddy needs them.
-- Put a GitHub token in `/root/.github_token_cscmaster` (a separate file from the other RetinueSoft sites). Token:
+- Put a GitHub token in `/root/.github_token` (the same file the other RetinueSoft sites use; skip if it is already there). Token:
   GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)**, scopes `repo` and `read:packages`:
   ```bash
-  echo '<token>' | sudo tee /root/.github_token_cscmaster >/dev/null && sudo chmod 600 /root/.github_token_cscmaster
+  echo '<token>' | sudo tee /root/.github_token >/dev/null && sudo chmod 600 /root/.github_token
   ```
 - Log the server's Docker in to ghcr.io once (as root, because update.sh runs with sudo; skip if already done for
   another site with a token that can read RetinueSoft packages). `update.sh` uses this login to pull the images:
   ```bash
-  sudo cat /root/.github_token_cscmaster | sudo docker login ghcr.io -u <github-username> --password-stdin
+  sudo cat /root/.github_token | sudo docker login ghcr.io -u <github-username> --password-stdin
   ```
 
 ## 2. Install
@@ -39,7 +39,7 @@ Only `update.sh` is downloaded by hand; it fetches the rest (repository and bran
 
 ```bash
 mkdir -p ~/cscmaster && cd ~/cscmaster
-sudo curl -fsSL -H "Authorization: Bearer $(sudo cat /root/.github_token_cscmaster)" -H "Accept: application/vnd.github.raw" \
+sudo curl -fsSL -H "Authorization: Bearer $(sudo cat /root/.github_token)" -H "Accept: application/vnd.github.raw" \
   "https://api.github.com/repos/RetinueSoft/CSCMaster/contents/deploy/update.sh?ref=postgres-migration" -o update.sh
 sudo chmod +x update.sh
 sudo ./update.sh            # first run: downloads the files next to update.sh and creates .env, then stops
