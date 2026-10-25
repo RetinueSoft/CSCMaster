@@ -69,10 +69,11 @@ namespace CSCMasterAPI.Controllers
             var user = new User() { Phone = model.Mobile, Password = model.Password };
             if (_userService.TryFeatchDetailForLogin(ref user))
             {
+                var role = user.Id == 3 ? Role.Accountant : Role.User;
                 var claims = new[]{
                                         new Claim("UserId", user.Id.ToString()),
                                         new Claim(ClaimTypes.Name, user.Name),
-                                        new Claim(ClaimTypes.Role, Role.User.ToString()),
+                                        new Claim(ClaimTypes.Role, role.ToString()),
                                         new Claim(ClaimTypes.MobilePhone, user.Phone.ToString()),
                                         new Claim(ClaimTypes.UserData, JsonSerializer.Serialize(user))
                                     };
@@ -92,7 +93,7 @@ namespace CSCMasterAPI.Controllers
                         Id = user.Id,
                         Name = user.Name,
                         Mobile = user.Phone,
-                        Role = Role.User
+                        Role = role
                     }
                 };
                 return new JsonResult(new ActionResponse() { SucessValue = tokenResponse });
@@ -133,7 +134,7 @@ namespace CSCMasterAPI.Controllers
                 issuer: "Retinue",
                 audience: "CSCMaster",
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(10),
+                expires: DateTime.Now.AddHours(10),
                 signingCredentials: credentials
             );
 

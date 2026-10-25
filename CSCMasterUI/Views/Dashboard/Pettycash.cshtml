@@ -1,0 +1,259 @@
+﻿@{
+    ViewData["Title"] = "Pettycash";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row" ng-controller="PettyCashController">
+    <div class="col-8 card shadow p-4 card-container" ng-hide="activity == 'LIST'" ng-keydown="onKeyDown($event)">
+        <div class="row">
+            <div class="col-md-8">
+                <fieldset>
+                    <legend>Transaction for</legend>
+                    <radgrp label="Income" name="transType" change="clearPage(activity)"
+                            cls="chkgrp-inline mt-3" mt="mt-0" model="input.transactionType" value="1" checked="true"></radgrp>
+                    <radgrp label="Expense" name="transType" change="clearPage(activity)"
+                            cls="chkgrp-inline" mt="mt-0" model="input.transactionType" value="2"></radgrp>
+                </fieldset>
+            </div>
+            <div class="col-md-4">
+                <dategrp model="input.date" label="Date" disabled="true" required></dategrp>
+            </div>
+        </div>
+        <div class="row" ng-keydown="onKeyDownForAddItem($event)">
+            <div class="col-md-4">
+                <div class="input-group mt-3">
+                    <label class="form-label">Item *{{header.itemListInput}}</label>
+                    <div class="input-group">
+                        <input list="itemList" id="itemListInput" class="form-control" ng-model="header.itemSearchStr" ng-change="findSelectedItem()" ng-keydown="onItemKeyDown($event)">
+                        <datalist id="itemList">
+                            <option ng-repeat="item in items | filter:{ transactionType: input.transactionType }" value="{{item.name}}"> </option>
+                        </datalist>
+                        <button class="btn btn-dark" ng-click="toggleItemSelector()">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <numgrp id="qty" label="Qty" cdivcls="col-md-2" placeholder="Qty"
+                    maxlength="4" model="header.quantity" required negative="false"></numgrp>
+
+            <numgrp id="mrp" label="MRP" cdivcls="col-md-2" placeholder="MRP"
+                    maxlength="5" model="header.mrp" required negative="false"></numgrp>
+
+            <numgrp id="price" label="Price" cdivcls="col-md-2" placeholder="Disc" disabled="true"
+                    model="header.mrp * header.quantity" required negative="false"></numgrp>
+
+            <numgrp id="discount" label="Disc" cdivcls="col-md-2" placeholder="Disc"
+                    maxlength="4" model="header.discount" required negative="false"></numgrp>
+
+            <txtgrp id="lineNotes" placeholder="Notes" label="Line Notes" cdivcls="col-md-6" maxlength="200" model="header.notes" required></txtgrp>
+
+            <div class="col-md-6 d-flex gap-1 justify-content-end">
+                <h4 class="mt-4">Price: <b class="highlightColor" id="fprice">{{(header.mrp * header.quantity)- header.discount}}</b></h4>
+            </div>
+        </div>
+        <div class="row">
+            <scbtngrp id="addItem" label="Add Item" cdivcls="col-md-12"
+                      sclick="addItem(input.item)" cclick="clearHeader()"></scbtngrp>
+        </div>
+        <div class="row">
+            <div class="table-responsive-lg mt-4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th width="40%">Item</th>
+                            <th class="text-right" width="13%">Qty</th>
+                            <th class="text-right" width="13%">MRP</th>
+                            <th class="text-right" width="13%">Disc</th>
+                            <th class="text-right" width="13%">Price</th>
+                            <th class="text-right" width="8%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in input.items">
+                            <td class="fw-semibold">{{item.item.name}}<br />{{item.notes}}</td>
+                            <td align="right">{{item.quantity}}</td>
+                            <td align="right">{{item.mrp}}</td>
+                            <td align="right">{{item.discount}}</td>
+                            <td align="right">{{item.price}}</td>
+                            <td align="right">
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <delbtngrp click="deleteItem(item);"></delbtngrp>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><a href ng-class="addAdjustment()">(+) Add Adjustment</a></td>
+                            <td class="text-right">{{itemsSum('quantity')}}</td>
+                            <td class="text-right">{{itemsSum('mrp')}}</td>
+                            <td class="text-right">{{itemsSum('discount')}}</td>
+                            <td class="text-right">{{input.finalAmount}}</td>
+                            <td class="text-right"></td>
+                            @* <td class="text-right">{{input.items.reduce((sum, x) => sum + x.mrp, 0)}}</td>
+                            <td class="text-right">{{input.items.reduce((sum, x) => sum + x.discount, 0)}}</td>
+                            <td class="text-right">{{input.items.reduce((sum, x) => sum + x.price, 0)}}</td> *@
+                        </tr>
+                        <tr ng-repeat="item in input.adjustments">
+                            <td class="fw-semibold" colspan="3">
+                                <txtgrp id="adjustment" placeholder="Adjustment Description"
+                                        maxlength="200" model="item.name" required></txtgrp>
+                            </td>
+                            <td colspan="2">
+                                <numgrp id="adustmentAmt" label="Amount" placeholder="+/- Amount"
+                                        maxlength="3" model="item.amount" required negative="true"></numgrp>
+                            </td>
+                        </tr>
+                        <tr ng-show="input.adjustments.length>0">
+                            <td class="fw-semibold" colspan="3">
+                                
+                            </td>
+                            <td colspan="2">
+                               {{0}}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="row">
+                    <txtgrp id="customer" label="Customer" cdivcls="col-md-12" placeholder="Name" sclick="toggleCustomerSelector()" disabled="true"
+                            maxlength="200" model="input.customer.name" required></txtgrp>
+                    <txtgrp id="customer" cdivcls="col-md-6" placeholder="Address" inline="true" disabled="true"
+                            maxlength="200" model="input.customer.address" required></txtgrp>
+                    <mobilegrp id="mobile" cdivcls="col-md-6" placeholder="9999999999" inline="true" disabled="true"
+                               model="input.customer.displayContactNumber" required></mobilegrp>
+                </div>
+            </div>
+            <div class="col-6">
+                <partial name="Payment" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <label class="form-label fw-semibold small mt-3">Notes</label>
+                <div class="input-group">
+                    <textarea class="form-control" rows="2" ng-model="input.notes"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <scbtngrp id="save" label="Save" cdivcls="offset-md-6 col-md-6"
+                      sclick="save()" cclick="showList()"></scbtngrp>
+        </div>
+    </div>
+    <div class="col-4" ng-hide="activity == 'LIST'">
+        <div class="table-responsive-lg mt-3">
+            <paged-table headers="[
+                { title: 'Date', width: '8%'},
+                { title: 'Item', width: '20%' },
+                { title: 'Qty', width: '6%', class:'text-right' },
+                { title: 'MRP', width: '6%', class:'text-right' },
+                { title: 'Disc', width: '6%', class:'text-right' },
+                { title: 'Price', width: '6%', class:'text-right' }]"
+                         fetch-method="manageListItems(pageNumber, successFun)"
+                         row-template="managePettyCashAccTemplate.html"
+                         context="this"
+                         on-init="onManagePagedTableInit(api)">
+            </paged-table>
+
+            <script type="text/ng-template" id="managePettyCashAccTemplate.html">
+                <td class="fw-semibold">{{item.date | dateDisplay}}</td>
+                <td colspan="5">
+                    <table class="table">
+                        <tbody>
+                            <tr ng-repeat="i in item.items" class="tableBorderLess">
+                                <td width="40%">{{i.item.name}}<span ng-if="i.notes">-{{i.notes}}</span></td>
+                                <td align="right" width="13%">{{i.quantity}}</td>
+                                <td align="right" width="13%">{{i.mrp}}</td>
+                                <td align="right" width="13%">{{i.discount}}</td>
+                                <td align="right" width="13%">{{i.price}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </script>
+        </div>
+    </div>
+    <div class="col-12" ng-show="activity == 'LIST'">
+        <div class="row">
+            <div class="col-md-3">
+                <dategrp model="listInput.fdate" label="From Date" disabled="true" required></dategrp>
+            </div>
+            <div class="col-md-3">
+                <dategrp model="listInput.tdate" label="To Date" disabled="true" required></dategrp>
+            </div>
+            <div class="col-md-2">
+                <label class="invisible">btn</label>
+                <button class="btn form-control mt-2" ng-click="tableApi.refresh(); getListHeader();">Laptop Data</button>
+            </div>
+            <div class="col-md-2">
+                <label class="invisible">btn</label>
+                <button class="btn form-control mt-2" ng-click="download()" ng-show="">Download</button>
+            </div>
+            <div class="col-md-2">
+                <h4 class="text-right">
+                    <a ng-click="clearPage()" ng-show="activity == 'LIST'" href>(+)Add</a>
+                </h4>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-3"><h4>Total Bill / Paid: {{listHeader.totalBillAmount}} / {{listHeader.totalPaidAmount}} [{{listHeader.totalBillCount}}]</h4></div>
+            <div class="col-3"><h4>Total Expense / Settled: {{listHeader.totalExpenseAmount}} / {{listHeader.totalSettledAmount}}</h4></div>
+            <div class="col-3"><h4>Cash Balance: {{listHeader.totalCashPaidAmount}} - {{listHeader.totalCashSettledAmount}} = {{listHeader.totalCashPaidAmount - listHeader.totalCashSettledAmount}}</h4></div>
+            <div class="col-3"><h4>Cashless Balance: {{listHeader.totalPaidAmount - listHeader.totalCashPaidAmount}} - {{listHeader.totalSettledAmount - istHeader.totalCashSettledAmount}} = {{(listHeader.totalPaidAmount - listHeader.totalCashPaidAmount) - (listHeader.totalSettledAmount - istHeader.totalCashSettledAmount)}}</h4></div>
+        </div>
+        <div class="table-responsive-lg mt-3">
+            <paged-table headers="[
+                { title: 'Date', width: '8%'},
+                { title: 'Customer', width: '20%'},
+                { title: 'Item', width: '20%' },
+                { title: 'Qty', width: '6%', class:'text-right' },
+                { title: 'MRP', width: '6%', class:'text-right' },
+                { title: 'Disc', width: '6%', class:'text-right' },
+                { title: 'Price', width: '6%', class:'text-right' },
+                { title: 'Bill', width: '8%', class:'text-right' },
+                { title: 'Paid', width: '8%', class:'text-right' },
+                { title: 'Settled', width: '8%', class:'text-right' },
+                { title: 'Balance', width: '8%', class:'text-right' },
+                { title: '', width: '8%' }]"
+                         fetch-method="listItems(pageNumber, successFun)"
+                         row-template="pettyCashAccTemplate.html"
+                         context="this"
+                         on-init="onPagedTableInit(api)">
+            </paged-table>
+
+            <script type="text/ng-template" id="pettyCashAccTemplate.html">
+                   <td class="fw-semibold">{{item.date | dateDisplay}}</td>
+                   <td class="">{{item.customer.name}}<br>{{item.notes}}</td>
+                   <td colspan="5">
+                        <table class="table">
+                            <tbody>
+                                <tr ng-repeat="i in item.items" class="tableBorderLess">
+                                    <td width="40%">{{i.item.name}}<span ng-if="i.notes">-{{i.notes}}</span></td>
+                                    <td align="right" width="13%">{{i.quantity}}</td>
+                                    <td align="right" width="13%">{{i.mrp}}</td>
+                                    <td align="right" width="13%">{{i.discount}}</td>
+                                    <td align="right" width="13%">{{i.price}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                   </td>
+                   <td align="right">{{item.billAmount}}</td>
+                   <td align="right">{{item.transactionType == 1 ? item.paidAmount:0}}</td>
+                   <td align="right">{{item.transactionType == 2 ? item.paidAmount:0}}</td>
+                   <td align="right">{{item.billAmount - item.paidAmount}}</td>
+                   <td>
+                        <div class="d-flex gap-1">
+                            <editbtngrp click="context.editClicked(item)"></editbtngrp>
+                            <delbtngrp click="context.deleteAccount(item)"></deatvbtngrp>
+                        </div>
+                   </td>
+            </script>
+        </div>
+    </div>
+</div>
+<partial name="ItemSelector" />
+<partial name="CustomerSelector" />
+

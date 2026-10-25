@@ -1,0 +1,30 @@
+﻿<div ng-controller="PaymentController" class="mt-3">
+    <b id="payment">Payments:</b>
+    <table width="100%">
+        <tr ng-repeat="pm in payments" ng-class="{ 'disable-control': pm.paymentType==999 }">
+            <td width="50%">
+                {{pm.description}}
+            </td>
+            <td width="25%" class="text-right">
+                <b ng-hide="amountEdit"><a href ng-click="amountEdit = true">{{pm.amount.toFixed(2)}}</a></b>
+                <input id="amountPM" type="number" class="form-control noscroll" ng-model="pm.amount" ng-show="amountEdit">
+            </td>
+            <th width="25%" class="text-right">
+                <a href ng-hide="amountEdit" ng-click="pm.amount=0; updateCreditAmount(pm)">Clear</a>
+                <a href ng-click="amountEdit = false; updateCreditAmount(pm)" ng-show="amountEdit">Save</a>
+            </th>
+        </tr>
+        
+        <tr>
+            <th>
+                Total
+            </th>
+            <th class="text-right">
+                {{totalAmount(payments).toFixed(2)}}
+            </th>
+            <th class="text-right">
+                <a href ng-hide="amountEdit" ng-click="clearAll()">Clear All</a>
+            </th>
+        </tr>
+    </table>
+</div>

@@ -23,6 +23,9 @@ namespace ReXLPosUI.Controllers
                 case "ADMIN":
                 case "BUSINESSOWNER":
                     return RedirectToAction("Admin");
+                case "3":
+                case "ACCOUNTANT":
+                    return RedirectToAction("Pettycash");
                 default:
                     return RedirectToAction("EntrolmentUpload");
             }
@@ -36,6 +39,10 @@ namespace ReXLPosUI.Controllers
             return View();
         }
         public IActionResult EntrolmentUpload()
+        {
+            return View();
+        }
+        public IActionResult Pettycash()
         {
             return View();
         }

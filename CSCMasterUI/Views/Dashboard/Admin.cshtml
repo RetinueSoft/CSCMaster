@@ -115,6 +115,11 @@
                                     <b>New</b>: {{(districts | sumBy:'newCount')}} [{{(districts | sumBy:'newAmount')}}+{{(districts | sumBy:'newGST')}}={{(districts | sumBy:'newTotal')}}],
                                     <b>Update</b>: {{(districts | sumBy:'updateCount')}} [{{(districts | sumBy:'updateAmount')}}+{{(districts | sumBy:'updateGST')}}={{(districts | sumBy:'updateTotal')}}],
                                 </div>
+                                <div>
+                                    <b>0 Total</b>: {{(districts | sumBy:'count0')}} [{{(districts | sumBy:'total0')}}]
+                                    <b>75 Total</b>: {{(districts | sumBy:'count75')}} [{{(districts | sumBy:'total75')}}]
+                                    <b>125 Total</b>: {{(districts | sumBy:'count125')}} [{{(districts | sumBy:'total125')}}]
+                                </div>
                                 @* <div>
                                     <b>0rs</b>: {{(districts | sumBy:'mobileCount')}} [{{(districts | sumBy:'mobileAmount')}}+{{(districts | sumBy:'mobileGST')}}={{(districts | sumBy:'mobileTotal')}}],
                                     <b>0rs</b>: {{(districts | sumBy:'newCount') + (districts | sumBy:'childCount')}}

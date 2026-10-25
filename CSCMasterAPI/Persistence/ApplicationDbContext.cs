@@ -3,6 +3,7 @@
 using CSCMasterAPI.Persistence.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.ComponentModel.Design;
 using System.Reflection.Emit;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -19,6 +20,14 @@ namespace CSCMasterAPI.Persistence
         public DbSet<UserDistrict> UserDistrict => Set<UserDistrict>();
         public DbSet<Member> Member => Set<Member>();
         public DbSet<Entrollment> Entrollment => Set<Entrollment>();
+
+        public DbSet<Company> Company => Set<Company>();
+        public DbSet<CompanyBranch> CompanyBranch => Set<CompanyBranch>();
+        public DbSet<Customer> Customer => Set<Customer>();
+        public DbSet<Item> Item => Set<Item>();
+        public DbSet<PettyCashAccount> PettyCashAccount => Set<PettyCashAccount>();
+        public DbSet<PettyCashAccountItem> PettyCashAccountItem => Set<PettyCashAccountItem>();
+
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -38,6 +47,11 @@ namespace CSCMasterAPI.Persistence
             UserDistrictModelCreating(modelBuilder.Entity<UserDistrict>());
             MemberModelCreating(modelBuilder.Entity<Member>());
             EntrollmentModelCreating(modelBuilder.Entity<Entrollment>());
+
+            PettyCashAccountCreating(modelBuilder.Entity<PettyCashAccount>());
+            PettyCashAccountItemCreating(modelBuilder.Entity<PettyCashAccountItem>());
+            PettyCashDefaultsCreating(modelBuilder.Entity<Company>(), modelBuilder.Entity<CompanyBranch>(), modelBuilder.Entity<Customer>(), modelBuilder.Entity<Item>());
+
             DbInitializeRecord(modelBuilder);
         }
         private void DefaultPreSetup(ModelBuilder modelBuilder)
@@ -56,6 +70,8 @@ namespace CSCMasterAPI.Persistence
         {
             userBuilder.HasKey(e => e.Id);
             userBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            userBuilder.HasOne<Company>().WithMany().HasForeignKey(e => e.CompanyId).OnDelete(DeleteBehavior.Restrict);
+            userBuilder.HasOne<CompanyBranch>().WithMany().HasForeignKey(e => e.BranchId).OnDelete(DeleteBehavior.Restrict);
         }
 
         private void DistrictModelCreating(EntityTypeBuilder<District> districtBuilder)
@@ -87,8 +103,86 @@ namespace CSCMasterAPI.Persistence
             entrollmentBuilder.HasOne<Member>().WithMany().HasForeignKey(e => e.MemberId).OnDelete(DeleteBehavior.Restrict);
             entrollmentBuilder.HasOne<District>().WithMany().HasForeignKey(e => e.DistrictId).OnDelete(DeleteBehavior.Restrict);
         }
+        private void PettyCashAccountCreating(EntityTypeBuilder<PettyCashAccount> pCashAccBuilder)
+       {
+            pCashAccBuilder.HasKey(e => e.Id);
+            pCashAccBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            pCashAccBuilder.HasOne<User>().WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Restrict);
+            pCashAccBuilder.HasOne<Company>().WithMany().HasForeignKey(e => e.CompanyId).OnDelete(DeleteBehavior.Restrict);
+            pCashAccBuilder.HasOne<CompanyBranch>().WithMany().HasForeignKey(e => e.BranchId).OnDelete(DeleteBehavior.Restrict);
+        }
+        private void PettyCashAccountItemCreating(EntityTypeBuilder<PettyCashAccountItem> pCashAccItemBuilder)
+        {
+            pCashAccItemBuilder.HasKey(e => e.Id);
+            pCashAccItemBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            pCashAccItemBuilder.HasOne<PettyCashAccount>().WithMany().HasForeignKey(e => e.AccountId).OnDelete(DeleteBehavior.Restrict);
+            pCashAccItemBuilder.HasOne<Item>().WithMany().HasForeignKey(e => e.ItemId).OnDelete(DeleteBehavior.Restrict);
+        }
+        private void PettyCashDefaultsCreating(EntityTypeBuilder<Company> companyBuilder, EntityTypeBuilder<CompanyBranch> branchBuilder, EntityTypeBuilder<Customer> customerBuilder, EntityTypeBuilder<Item> itemBuilder)
+        {
+            companyBuilder.HasKey(e => e.Id);
+            companyBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            companyBuilder.HasIndex(e => e.Name).IsUnique();
+
+            branchBuilder.HasKey(e => e.Id);
+            branchBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            branchBuilder.HasIndex(e => e.Name).IsUnique();
+
+            customerBuilder.HasKey(e => e.Id);
+            customerBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            customerBuilder.HasOne<Company>().WithMany().HasForeignKey(e => e.CompanyId).OnDelete(DeleteBehavior.Restrict);
+            customerBuilder.HasOne<CompanyBranch>().WithMany().HasForeignKey(e => e.BranchId).OnDelete(DeleteBehavior.Restrict);
+
+            itemBuilder.HasKey(e => e.Id);
+            itemBuilder.Property(e => e.Id).ValueGeneratedOnAdd();
+            itemBuilder.HasIndex(e => e.Name).IsUnique();
+        }
         private void DbInitializeRecord(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Company>().HasData(new
+            {
+                Id = 1,
+                Name = "Retinue"
+            });
+            modelBuilder.Entity<CompanyBranch>().HasData(new
+            {
+                Id = 1,
+                CompanyId = 1,
+                Name = "Main"
+            });
+            modelBuilder.Entity<Company>().HasData(new
+            {
+                Id = 2,
+                Name = "FriendsCSC"
+            });
+            modelBuilder.Entity<CompanyBranch>().HasData(new
+            {
+                Id = 2,
+                CompanyId = 2,
+                Name = "FriendsCSC Mannai"
+            });
+            modelBuilder.Entity<User>().HasData(new
+            {
+                Id = 3,
+                Name = "Frds MAU1",
+                Phone = "9444490228",
+                Aadhaar = "123456789013",
+                Status = true,
+                Username = "Frds U1",
+                Password = "0228@",
+                LoginAllowed = true,
+                CompanyId = 2,
+                BranchId = 2
+            });
+            modelBuilder.Entity<Customer>().HasData(new
+            {
+                Id = 1,
+                Name = "UNKNOWN",
+                Address = "UNKNOWN",
+                ContactInfoJSon = @"[{""Type"":1,""Number"":""9999999999""}]",
+                CompanyId = 2,
+                BranchId = 2
+            });
             modelBuilder.Entity<District>().HasData(new
             {
                 Id = 1,
@@ -108,7 +202,9 @@ namespace CSCMasterAPI.Persistence
                 Status = true,
                 Username = "Redmin",
                 Password = "Red@123",
-                LoginAllowed = true
+                LoginAllowed = true,
+                CompanyId = 1,
+                BranchId = 1
             });
 
             modelBuilder.Entity<User>().HasData(new
@@ -120,7 +216,9 @@ namespace CSCMasterAPI.Persistence
                 Status = true,
                 Username = "Karthi",
                 Password = "Karthi123",
-                LoginAllowed = true
+                LoginAllowed = true,
+                CompanyId = 2,
+                BranchId = 2
             });
 
             modelBuilder.Entity<UserDistrict>().HasData(new

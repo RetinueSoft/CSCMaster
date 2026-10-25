@@ -7,11 +7,10 @@ myModule.filter('sumBy', function () {
 
         var sum = 0;
         angular.forEach(data, function (v) {
-            console.log(v);
             sum += parseFloat(v[key]) || 0;
         });
 
-        return sum;
+        return parseFloat(sum.toFixed(2));
     };
 });
 function EntrolmentViewController(binder, service, popupModal) {

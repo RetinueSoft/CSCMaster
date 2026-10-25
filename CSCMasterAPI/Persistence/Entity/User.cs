@@ -9,5 +9,7 @@
         public bool Status { get; set; } = false;
         public string Password { get; set; } = string.Empty;
         public bool LoginAllowed { get; set; } = false;
+        public int CompanyId { get; set; }
+        public int BranchId { get; set; }
     }
 }

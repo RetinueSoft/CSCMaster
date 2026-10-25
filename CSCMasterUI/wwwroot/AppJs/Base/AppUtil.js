@@ -81,7 +81,6 @@ function isNullOrEmpty(obj, propertyChain) {
         if (currentObj?.hasOwnProperty(properties[i])) {
             currentObj = currentObj[properties[i]];
         } else {
-            console.log(`Property '${properties[i]}' is undefined.`);
             return true;
         }
     }
@@ -221,3 +220,15 @@ function initializeDatepickers() {
 function setToDatePicker(controlName, isoDate) {
     $('#' + controlName).datepicker('setDate', new Date(new Date(isoDate).toLocaleString()));
 }
+function getTodayForPicker() {
+    let d = new Date();
+    return new Date(
+        d.getTime() - (d.getTimezoneOffset() * 60000)
+    ).toISOString().slice(0, 19);
+    //return d.toISOString();
+    // let day = ('0' + d.getDate()).slice(-2);
+    // let month = ('0' + (d.getMonth() + 1)).slice(-2);
+    // let year = d.getFullYear();
+
+    // return day + '/' + month + '/' + year;
+};

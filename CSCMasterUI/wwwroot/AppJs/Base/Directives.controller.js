@@ -14,17 +14,21 @@ myModule.directive("txtgrp", function () {
             cls: "@",
             code: "@",
             mt: "@",
-            keyup:"&?"
+            keyup: "&?",
+            inline: "@",
+            sclick: "&?",
+            disabled: "<"
         },
         template: `
-        <div class="input-group">
-            <div class="input-group-prepend">
-                <span class="input-group-text" ng-class="{\'rem6dot5\': !isOverflow}">{{displayLabel}}</span>
-            </div>
-            <input id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control"
+        <div>
+            <label class="form-label fw-semibold small" ng-show="!sameline">{{displayLabel}}</label>
+            <div class="input-group">
+                <input  placeholder="{{displayPlaceholder}}" class="form-control" ng-disabled="disabled"
                    type="text" maxlength="{{maxlength}}" ng-model="model"
                    ng-keypress="filterInput($event)"
                    ng-keyup="onKeyUp($event)"></input>
+                <button class="btn btn-dark" ng-if="sclick" ng-click="sclick()"><i class="fa fa-search"></i></button>
+            </div>
         </div>`,
         link: applyTextFilters
     };
@@ -44,16 +48,29 @@ myModule.directive("numgrp", function () {
             onenter: "&",
             mt: "@",
             inline: "@",
-            change: "&"
+            change: "&",
+            negative: '@',
+            disabled: "<"
         },
         controller: function ($scope, $element, $timeout) {
             const input = $element.find('input');
             input.on('input', function () {
-                const regex = new RegExp(`^(\\d{0,${$scope.maxlength}}(?:\\.\\d{0,2})?).*$`);
-                const cleanValue = this.value
-                    .replace(/[^0-9.]/g, '')
+                let regexStr;
+                if ($scope.negative === 'true' || $scope.negative === true) {
+                    regexStr = `^(-?\\d{0,${$scope.maxlength}}(?:\\.\\d{0,2})?).*$`;
+                } else {
+                    regexStr = `^(\\d{0,${$scope.maxlength}}(?:\\.\\d{0,2})?).*$`;
+                }
+                const regex = new RegExp(regexStr);
+                let cleanValue = this.value
+                    .replace($scope.negative === 'true' || $scope.negative === true ? /[^0-9.\-]/g : /[^0-9.]/g, '')
                     .replace(/(\..*?)\./g, '$1')
                     .replace(regex, '$1');
+
+                // Only allow one leading minus sign
+                if ($scope.negative === 'true' || $scope.negative === true) {
+                    cleanValue = cleanValue.replace(/(?!^)-/g, '');
+                }
 
                 if (cleanValue !== this.value) {
                     this.value = cleanValue;
@@ -69,17 +86,14 @@ myModule.directive("numgrp", function () {
             };
         },
         template: `
-        <div class="input-group" ng-show="!sameline">
-            <div class="input-group-prepend">
-                <span class="input-group-text" ng-class="{\'rem6dot5\': !isOverflow}">{{displayLabel}}</span>
-            </div>
-            <input id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control"
+        <div ng-show="!sameline">
+            <label class="form-label fw-semibold small">{{displayLabel}}</label>
+            <input id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control" ng-disabled="disabled"
                    type="text" ng-model="model"
-                   ng-keydown="onEnterKey($event)"
-                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"></input>
+                   ng-keydown="onEnterKey($event)"></input>
         </div>
 
-        <input ng-show="sameline" id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control"
+        <input ng-show="sameline" id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control" ng-disabled="disabled"
                    type="text" ng-model="model"
                    ng-keydown="onEnterKey($event)"
                    ng-change="onChange()"></input>`,
@@ -98,19 +112,20 @@ myModule.directive("mobilegrp", function () {
             cdivcls: "@",
             cls: "@",
             mt: "@",
-            inline: "@"
+            inline: "@",
+            sclick: "&?",
+            disabled: "<",
+            fa: "@?"
         },
         transclude: true,
         template: `
-         <div class="input-group">
-            <div class="input-group-prepend" ng-show="!sameline">
-                <span class="input-group-text rem6dot5">{{displayLabel}}</span>
-            </div>
-            <input id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control"
+         <div>
+            <label class="form-label fw-semibold small" ng-show="!sameline">{{displayLabel}}</label>
+            <div class="input-group">
+                <input id="{{id}}" placeholder="{{displayPlaceholder}}" class="form-control" ng-disabled="disabled"
                    type="text" maxlength="10" ng-model="model"
                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"></input>
-            <div class="input-group-postpend">
-                <div ng-transclude class="mt-0" style="height: 100%;"></div>
+                <button class="btn btn-dark" ng-if="sclick" ng-click="sclick()"><i class="fa {{fa || 'fa-search'}}"></i></button>
             </div>
         </div>`,
         link: applyTextFilters
@@ -128,13 +143,12 @@ myModule.directive("passgrp", function () {
             cdivcls: "@",
             cls: "@",
             onenter: "&",
-            mt: "@"
+            mt: "@",
+            inline: "@"
         },
         template: `
-        <div class="input-group">
-            <div class="input-group-prepend">
-                <span class="input-group-text rem6dot5">{{displayLabel}}</span>
-            </div>
+        <div>
+            <label class="form-label fw-semibold small" ng-show="!sameline">{{displayLabel}}</label>
             <input type="password" class="form-control" id="{{id}}" 
                    placeholder="{{displayPlaceholder}}" ng-model="model"
                    ng-keydown="onEnterKey($event)">
@@ -211,7 +225,7 @@ myModule.directive("cmbgrp", function () {
         },
         transclude: true,
         controller: function ($scope, $element, $timeout) {
-            var mtVal = $scope.mt || "mt-4";
+            var mtVal = $scope.mt || "mt-3";
             $timeout(function () {
                 const firstDiv = Array.from($element[0].children).find(el => el.tagName === "DIV");
                 if (firstDiv)
@@ -223,7 +237,6 @@ myModule.directive("cmbgrp", function () {
                     $scope.setModel($scope.modelMap[0].original);
                 }
             });
-
             $scope.setModel = function (item) {
                 $timeout(function () {
                     $scope.modelTemp = $scope.modelMap.find(x => x.original === item);
@@ -235,8 +248,8 @@ myModule.directive("cmbgrp", function () {
                 setModel: $scope.setModel
             };
 
-            
-            $timeout(function () { $scope.$emit($scope.id+':ready', { api: $scope.api }); }, 50);
+
+            $timeout(function () { $scope.$emit($scope.id + ':ready', { api: $scope.api }); }, 50);
         },
         template: `
         <div class="input-group">
@@ -263,20 +276,24 @@ myModule.directive("scbtngrp", function () {
             id: "@",
             label: "@",
             sclick: "&",
-            cclick:"&",
+            cclick: "&",
             disabled: "=",
             cdivcls: "@",
             cls: "@",
             mt: "@"
         },
         template: `
-        <div class="d-flex align-items-center">
-            <button class="btn btn-primary" ng-click="sclick()" ng-disabled="disabled">
-                {{label}}
-            </button>
-            <button class="ms-1 btn btn-primary" ng-click="cclick()" ng-disabled="disabled">
-                Cancel
-            </button>
+        <div class = "row">
+            <div class="col-6 align-items-center">
+                <button class="btn btn-primary form-control" ng-click="sclick()" ng-disabled="disabled">
+                    {{label}}
+                </button>
+            </div>
+            <div class="col-6 align-items-center">
+                <button class="ms-1 btn btn-primary form-control" ng-click="cclick()" ng-disabled="disabled">
+                    Cancel
+                </button>
+            </div>
         </div>`,
         link: commonLink
     };
@@ -382,6 +399,77 @@ myModule.directive("iconbtngrp", function () {
         link: commonLink
     };
 });
+
+myModule.directive('dategrp', function () {
+    return {
+        restrict: 'E',
+        scope: {
+            label: "@",
+            required: "@",
+            model: "=",
+            disabled: "<"
+        },
+        template: `
+        <div>
+            <label class="form-label fw-semibold small">{{displayLabel}}</label>
+            <div class="input-group date">
+                <input type="text" class="form-control" ng-readonly="disabled"/>
+                <button class="btn btn-dark"><i class="fa fa-calendar"></i></button>
+            </div>
+        </div>`,
+        link: function (scope, element) {
+            applyTextFilters(scope, element);
+
+            var input = element.find('input');
+            var lastValue = scope.model || '';
+
+            input.datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+
+            input.on('changeDate', function (e) {
+                scope.$apply(function () {
+                    scope.model = new Date(
+                        e.date.getTime() - (e.date.getTimezoneOffset() * 60000)
+                    ).toISOString().slice(0, 19);
+                    //scope.model = e.date.toISOString();
+                    lastValue = scope.model;
+                });
+            });
+
+            element.find('button').on('click', function () {
+                input.datepicker('show');
+            });
+
+            input.on('blur', function () {
+                input.val(scope.model || '');
+            });
+            input.on('hide', function () {
+
+                if (!input.val()) {
+                    input.val(lastValue);
+
+                    scope.$applyAsync(function () {
+                        scope.model = lastValue;
+                    });
+                }
+            });
+
+            scope.$watch('model', function (newVal) {
+                lastValue = newVal || '';
+
+                console.log(newVal);
+                if (newVal) {
+                    const d = new Date(newVal);
+                    input.datepicker('update', d);
+                }
+                //input.val(lastValue);
+            });
+        }
+    };
+});
 function commonLink(scope, element) {
     createDivAndClass(scope, element);
     setSpanWidth(scope, element);
@@ -400,7 +488,7 @@ function createDivAndClass(scope, element) {
     }
 
     if (scope.hasOwnProperty("mt")) {
-        var mtVal = scope.mt ? scope.mt : "mt-4";
+        var mtVal = scope.mt ? scope.mt : "mt-3";
         angular.forEach(element, function (el) {
             const children = el.children;
 
@@ -518,7 +606,7 @@ function applyComboFilters(scope, element, timeout) {
             return { displayName: values.join('-'), original: item };
         });
     });
-    
+
     scope.$watch('modelTemp', function (newVal, oldVal) {
         if (newVal != null && oldVal != null)
             scope.setModel(newVal.original);
@@ -589,7 +677,7 @@ myModule.directive("pagedTable", function () {
                 <iconbtngrp click="pagination.nextPage()" disabled="pagination.isLastPage" tooltip="Next Page">
                     <i class="fa-solid fa-arrow-right"></i>
                 </iconbtngrp>
-                <iconbtngrp click="pagination.lastPage()" disabled="pagination.isLastPage" tooltip="Last Page">
+                <iconbtngrp click="pagination.lastPage()" disabled="pagination.isLastPage" tooltip="Last Page (Total Page:{{pagination.totalPages}}, Total Item:{{pagination.totalItemCount}})">
                     <i class="fa-solid fa-forward-fast"></i>
                 </iconbtngrp>
             </div>
@@ -607,12 +695,14 @@ myModule.directive("pagedTable", function () {
                 loadPage: function (page) {
                     scope.fetchMethod({
                         pageNumber: page, successFun: (result) => {
-                            this.items = result.pagedList;
-                            this.isFirstPage = !result.previousPage;
-                            this.isLastPage = !result.nextPage;
-                            this.totalPages = result.totalPages;
-                            this.totalItemCount = result.totalCount;
-                            this.currentPage = result.pageIndex;
+                            scope.$applyAsync(() => {
+                                this.items = result.pagedList;
+                                this.isFirstPage = !result.previousPage;
+                                this.isLastPage = !result.nextPage;
+                                this.totalPages = result.totalPages;
+                                this.totalItemCount = result.totalCount;
+                                this.currentPage = result.pageIndex;
+                            });
                         }
                     });
                 },
@@ -668,7 +758,7 @@ myModule.directive("inputSelector", function () {
     return {
         restrict: "E",
         scope: {
-            mt:'@',
+            mt: '@',
             label: '@',
             cdivcls: "@",
             filterby: '=',
@@ -966,7 +1056,7 @@ myModule.directive("itemGridSearch", function () {
         scope: {
             itemService: "=",
             selected: "&",
-            itemSelected:"="
+            itemSelected: "="
         },
         controller: function ($scope) {
             $scope.currency = GetValueFromCache("curSymbole");
@@ -1250,7 +1340,7 @@ myModule.directive("editgrp", function ($timeout) {
                 if ($attrs.must) {
                     var error = scope.must({ tempValue: scope.tempValue });
                     if (error != "") {
-                        SetControlError(scope.id +"editInp", error); valid = false;
+                        SetControlError(scope.id + "editInp", error); valid = false;
                     }
                 }
 
@@ -1264,8 +1354,141 @@ myModule.directive("editgrp", function ($timeout) {
                     bsModal.hide();
                     if (scope.edited) scope.edited();
                 }, 0);
-                
+
             };
+        }
+    };
+});
+myModule.directive("imageEditor", function () {
+    return {
+        restrict: "E",
+        scope: {
+            id: "@",
+            side: '@',
+            imageLabels: '=',
+            selectedTemplate: '=',
+            draggedItem: '=',
+            enableTextEdit: "@",
+            imageType: '=',
+            showOnlyPosition: '@',
+            selectedSetting: '@'
+        },
+        transclude: true,
+        //<button ng-click="zoomIn()">+</button>
+        //<button ng-click="zoomOut()">-</button>
+        //onload="angular.element(this).scope().autoFitZoom()"
+        templateUrl: `/Pages/ImageTemplate`,
+        controller: function ($scope, $timeout) {
+            let emptyImageLabels = [{ image: 'Front', groups: [] }, { image: 'Back', groups: [] }];
+            $scope.selectedSetting = angular.isDefined($scope.showOnlyPosition) ? 'position' : 'text';
+            $scope.hasTextType = function (grp) {
+                if (!grp || !grp.source) return false;
+
+                for (var i = 0; i < grp.source.length; i++) {
+                    var s = grp.source[i];
+                    if (s.displayItem && s.displayItem.type == 1) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            $scope.zoom = 1;
+
+            $scope.zoomIn = function () {
+                $scope.zoom += 0.1;
+            };
+
+            $scope.zoomOut = function () {
+                if ($scope.zoom > 0.2)
+                    $scope.zoom -= 0.1;
+            };
+            $scope.autoFitZoom = function () {
+                //$scope.zoom = 0.6;
+                //$scope.$apply();
+
+
+                //setTimeout(function () {
+
+                //    let container = document.querySelector(".img-wrapper-parent"); // outer div
+                //    let content = document.querySelector(".img-wrapper"); // scaled content
+
+                //    if (!container || !content) return;
+
+                //    let containerWidth = container.clientWidth;
+                //    let containerHeight = container.clientHeight;
+
+                //    let contentWidth = content.scrollWidth;
+                //    let contentHeight = content.scrollHeight;
+
+                //    let scaleX = containerWidth / contentWidth;
+                //    let scaleY = containerHeight / contentHeight;
+
+                //    // choose smaller scale to fit both width & height
+                //    let newZoom = 0.60;
+
+                //    $scope.$apply(function () {
+                //        $scope.zoom = newZoom;
+                //    });
+
+                //}, 300); // wait for render
+            };
+
+            $scope.onDragOver = function (event, element) {
+
+                //var index = element.getAttribute("data-index");
+                //var group = $scope.selectedTemplate.groupBox[$scope.draggedItem.index];
+                //var group = $scope.draggedItem;
+                //if (!$scope.draggedItem) return;
+
+                //group.items = group.items || [];
+
+                //if (!group.items.includes($scope.draggedItem)) {
+                //    var lastindex = group.items.length > 0 ? group.items[group.items.length - 1].index : 0;
+                //    var srcItem = angular.copy($scope.draggedItem);
+                //    srcItem.seperator = '';
+                //    group.items.push({ displayItem: $scope.draggedItem, sourceItem: [srcItem], index: lastindex + 1 });
+                //}
+            };
+            $scope.onDropOnImage = function (event, element) {
+                event.preventDefault();
+                if (!$scope.draggedItem) return;
+
+                var imageType = $scope.side == 'front' ? 'Front' : 'Back';
+                console.log($scope.side);
+                var group = $scope.selectedTemplate.groupBox;
+                $scope.imageLabels = ($scope.imageLabels && $scope.imageLabels.length) ? $scope.imageLabels : angular.copy(emptyImageLabels);
+                var groupBox = group.find(x => x.index == $scope.draggedItem.index);
+                var image = $scope.imageLabels.find(x => x.image == imageType);
+
+                var fontSize = 14;
+                var rect = element.getBoundingClientRect();
+                var gX = event.clientX - rect.left;
+                var gY = event.clientY - rect.top;
+
+                var source = [];
+                groupBox.items.forEach((i, idx) => {
+                    source.push(i);
+                });
+
+                var kS = source.some(s => s.sourceItem.some(x => x.key !== '')) ? 200 : 0;
+                image.groups.push({
+                    group: groupBox, type: groupBox.items[0].displayItem.type, x: gX, y: gY, ks: kS, vs: 430, ls: 25, f: fontSize, source: source
+                });
+            };
+        },
+        link: function (scope, element) {
+            element.on('dragover', function (event) {
+                //scope.onDragOver(event, element[0]);
+                event.preventDefault();
+                scope.$apply();
+            });
+
+            element.on('drop', function (event) {
+                scope.onDropOnImage(event, element[0]);
+                scope.$apply(); // important
+            });
+
         }
     };
 });

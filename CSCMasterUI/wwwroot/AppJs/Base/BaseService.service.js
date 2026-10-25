@@ -6,6 +6,9 @@
     function server(popup) {
         this.Get = Get;
         this.Post = Post;
+        this.Put = Put;
+        this.Delete = Delete;
+
         function Get(url, sucessFunc) {
             GetPrivate(apiBaseUrl + url, sucessFunc);
         }
@@ -14,13 +17,31 @@
 
             var token = GetValueFromCache("logintoken");
             if (url.includes("Auth/Login") || url.includes("Home/Logout") || !isJwtExpired(token))
-                doPost(token, url, data, sucessFunc, failureFunc);
+                doPost('POST', token, url, data, sucessFunc, failureFunc);
             else {
                 refreshJwtToken(function () {
                     token = GetValueFromCache("logintoken");
-                    doPost(token, url, data, sucessFunc, failureFunc);
+                    doPost('POST', token, url, data, sucessFunc, failureFunc);
                 });
             }
+        }
+        function Put(url, data, sucessFunc, failureFunc) {
+            $('.loader_bg').fadeIn();
+
+            var token = GetValueFromCache("logintoken");
+            refreshJwtToken(function () {
+                token = GetValueFromCache("logintoken");
+                doPost('PUT',token, url, data, sucessFunc, failureFunc);
+            });
+        }
+        function Delete(url, data, sucessFunc, failureFunc) {
+            $('.loader_bg').fadeIn();
+
+            var token = GetValueFromCache("logintoken");
+            refreshJwtToken(function () {
+                token = GetValueFromCache("logintoken");
+                doPost('DELETE', token, url, data, sucessFunc, failureFunc);
+            });
         }
         function GetPrivate(url, sucessFunc) {
             $('.loader_bg').fadeIn();
@@ -98,12 +119,11 @@
                 }
             });
         }
-        function doPost(token, url, data, sucessFunc, failureFunc) {
+        function doPost(type, token, url, data, sucessFunc, failureFunc) {
             var isFormData = (data instanceof FormData);
-
             $.ajax({
                 async: false,
-                type: "POST",
+                type: type,
                 url: apiBaseUrl + url,
                 data: isFormData ? data : JSON.stringify(data),
                 contentType: isFormData ? false : "application/json",
@@ -112,7 +132,6 @@
                     "Authorization": "Bearer " + token
                 },
                 success: function (response) {
-                    console.log(response);
                     setTimeout(function () {
                         $('.loader_bg').fadeOut();
                     }, 10);
@@ -152,7 +171,7 @@
                         if (url.startsWith(apiBaseUrl) && !url.includes("/Auth/refresh")) {
                             refreshJwtToken(function () {
                                 var token = GetValueFromCache("logintoken");
-                                doPost(token, url, data, sucessFunc, failureFunc);
+                                doPost(type, token, url, data, sucessFunc, failureFunc);
                             });
                         }
                         else if (window.location.pathname !== "/Home/Login") {
@@ -164,11 +183,25 @@
                     } else if (response.status == 404) {
                         msg = 'Requested page not found. [404]';
                     } else if (response.status == 500) {
-                        msg = 'Internal Server Error [500].';
+                        if (failureFunc != null) {
+                            failureFunc(response.responseJSON.errorMessage);
+                        }
+                        else {
+                            msg = response.responseJSON.errorMessage.map(e => {
+                                if (e.field && e.fieldValue) {
+                                    return `${e.field}: ${e.message} (wrong value: ${e.fieldValue})`;
+                                } else if (!e.field && e.fieldValue) {
+                                    return `${e.message} (wrong value: ${e.fieldValue})`;
+                                } else if (e.field && !e.fieldValue) {
+                                    return `${e.field}: ${e.message}`;
+                                } else {
+                                    return `${e.message}`;
+                                }
+                            }).join('\n');
+                        }
                     } else {
-                        msg = 'Uncaught Error.\n' + response.responseText;
+                        msg = 'Uncaught Error.\n' + response.responseJSON;
                     }
-                    console.log(msg);
                     if (msg != "")
                         popup.error(msg);
                 }
@@ -186,7 +219,7 @@
             };
 
             if (currentToken != "")
-                doPost(currentToken, "/Auth/refresh", data, function (response) {
+                doPost('POST', currentToken, "/Auth/refresh", data, function (response) {
                     AddIntoCache("logintoken", response.accessToken);
                     AddIntoCache("refreshtoken", response.refreshToken);
                     fetch("/Home/StoreToken", {

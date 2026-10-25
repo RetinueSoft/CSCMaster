@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 //    options.Filters.Add(new AuthorizeFilter(policy));
 //});
+builder.Services.Configure<RazorViewEngineOptions>(o =>
+{
+    o.ViewLocationFormats.Add("/Views/Selector/{0}" + RazorViewEngine.ViewExtension);
+});
 
 var app = builder.Build();
 

@@ -37,12 +37,11 @@ namespace CSCMasterAPI.Persistence.Service
             using var transaction = _dbContext.Database.BeginTransaction();
             try
             {
-                entrollments.Select(x=>new { x.EIDDate, x.Type }).Distinct().ToList().ForEach(x =>
+                entrollments.Select(x=>new { x.EIDDate }).Distinct().ToList().ForEach(x =>
                 {
                     var existingEntrollments = _dbContext.Entrollment
-                    .Where(e => e.MemberId == memberId && e.EIDDate.Date == x.EIDDate.Date && e.Type == x.Type)
+                    .Where(e => e.MemberId == memberId && e.EIDDate.Date == x.EIDDate.Date)
                     .ToList();
-                    var ss = _dbContext.Entrollment.Select(s => s.EIDDate.Date).Distinct().ToList();
                     _dbContext.Entrollment.RemoveRange(existingEntrollments);
                 });
 
@@ -184,6 +183,15 @@ namespace CSCMasterAPI.Persistence.Service
                                     NewTotal = entrolQry.Where(x => x.DistrictId == d.Id && x.Type == "N").Sum(x => x.Total),
                                     UpdateTotal = entrolQry.Where(x => x.DistrictId == d.Id && x.Type == "U").Sum(x => x.Total),
                                     TotalTypeTotal = entrolQry.Where(x => x.DistrictId == d.Id).Sum(x => x.Total),
+
+
+                                    Total75 = entrolQry.Where(x => x.DistrictId == d.Id && x.Total == 75).Sum(x => x.Total),
+                                    Total125 = entrolQry.Where(x => x.DistrictId == d.Id && x.Total == 125).Sum(x => x.Total),
+                                    Total0 = entrolQry.Where(x => x.DistrictId == d.Id && x.Total == 0).Sum(x => x.Total),
+
+                                    Count75 = entrolQry.Count(x => x.DistrictId == d.Id && x.Total == 75),
+                                    Count125 = entrolQry.Count(x => x.DistrictId == d.Id && x.Total == 125),
+                                    Count0 = entrolQry.Count(x => x.DistrictId == d.Id && x.Total == 0)
                                 };
 
             return userDetailQry.ToList();
@@ -228,6 +236,14 @@ namespace CSCMasterAPI.Persistence.Service
                                     NewTotal = entrolQry.Where(x => x.MemberId == m.Id && x.Type == "N").Sum(x => x.Total),
                                     UpdateTotal = entrolQry.Where(x => x.MemberId == m.Id && x.Type == "U").Sum(x => x.Total),
                                     TotalTypeTotal = entrolQry.Where(x => x.MemberId == m.Id).Sum(x => x.Total),
+
+                                    Total75 = entrolQry.Where(x => x.MemberId == m.Id && x.Total == 75).Sum(x => x.Total),
+                                    Total125 = entrolQry.Where(x => x.MemberId == m.Id && x.Total == 125).Sum(x => x.Total),
+                                    Total0 = entrolQry.Where(x => x.MemberId == m.Id && x.Total == 0).Sum(x => x.Total),
+
+                                    Count75 = entrolQry.Count(x => x.MemberId == m.Id && x.Total == 75),
+                                    Count125 = entrolQry.Count(x => x.MemberId == m.Id && x.Total == 125),
+                                    Count0 = entrolQry.Count(x => x.MemberId == m.Id && x.Total == 0)
                                 };
 
             return userDetailQry.ToList();

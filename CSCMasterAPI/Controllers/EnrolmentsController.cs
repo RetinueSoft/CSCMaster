@@ -27,7 +27,7 @@ namespace CSCMasterAPI.Controllers
         }
 
         [HttpPost("MyDistricts")]
-        public IActionResult MyDistricts([FromBody] MyDistrictEnrolmentModel input)
+        public IActionResult MyDistricts([FromBody] DateInputModel input)
         {
             int userId = FindUserId(out var role);
 

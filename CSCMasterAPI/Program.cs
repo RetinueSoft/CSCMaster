@@ -1,5 +1,7 @@
+using CSCMasterAPI.Models;
 using CSCMasterAPI.Persistence;
 using CSCMasterAPI.Persistence.Service;
+using CSCMasterAPI.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -8,28 +10,42 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+//using Serilog;
+
+//// Configure Serilog as the logging provider
+//Log.Logger = new LoggerConfiguration()
+//    .WriteTo.File(
+//        path: "logs/log.txt",
+//        rollingInterval: Serilog.RollingInterval.Day
+//    ).CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Use Serilog for logging
+//builder.Host.UseSerilog(Log.Logger);
+
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
-                option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-            );
+    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEnrolmentService, EnrolmentService>();
+builder.Services.AddScoped<IPettyCashService, PettyCashService>();
+builder.Services.AddScoped<ILoginContext, LoginContext>();
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(allowedOrigins)//.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
-        //.AllowCredentials(); // only if you're using cookies or auth headers
+        // .AllowCredentials(); // only if you're using cookies or auth headers
     });
 });
+
 // Add services to the container.
 builder.Services.AddControllers(options =>
 {
@@ -110,15 +126,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseCors();
 
 app.UseRouting();
 app.UseAuthentication();
+app.UseMiddleware<LoginContextMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.Run();

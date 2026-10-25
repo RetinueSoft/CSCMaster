@@ -70,6 +70,14 @@ namespace CSCMasterAPI.Models
         public decimal UpdateTotal { get; set; }
         public decimal NewTotal { get; set; }
         public decimal TotalTypeTotal { get; set; }
+
+
+        public decimal Total75 { get; set; }
+        public decimal Total125 { get; set; }
+        public decimal Total0 { get; set; }
+        public decimal Count75 { get; set; }
+        public decimal Count125 { get; set; }
+        public decimal Count0 { get; set; }
     }
 
     public class MemberModel
@@ -125,16 +133,16 @@ namespace CSCMasterAPI.Models
         public string FOREIGN_RESIDENT { get; set; }
     }
 
-    public class MyDistrictEnrolmentModel
+    public class DateInputModel
     {
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
     }
-    public class MyDistrictMemberEnrolmentModel: MyDistrictEnrolmentModel
+    public class MyDistrictMemberEnrolmentModel: DateInputModel
     {
         public int DistrictId { get; set; }
     }
-    public class MyMemberEnrolmentModel : MyDistrictEnrolmentModel
+    public class MyMemberEnrolmentModel : DateInputModel
     {
         public int MemberId { get; set; }
     }
@@ -145,10 +153,24 @@ namespace CSCMasterAPI.Models
         public IFormFile File { get; set; }
     }
 
+    public interface ILoginContext
+    {
+        public int CompanyId { get; set; }
+        public int BranchId { get; set; }
+        public int UserId { get; set; }
+    }
+    public class LoginContext : ILoginContext
+    {
+        public int CompanyId { get; set; }
+        public int BranchId { get; set; }
+        public int UserId { get; set; }
+    }
+
     public enum Role
     {
         Unknown = 0,
         User,
         Member,
+        Accountant
     }
 }

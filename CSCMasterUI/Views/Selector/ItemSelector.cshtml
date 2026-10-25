@@ -1,0 +1,46 @@
+﻿<div class="modal fade" id="ItemSelector" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content" ng-controller="ItemSelectorController">
+            <div class="modal-header">
+                <h5 class="modal-title">{{title}} Selector</h5>
+
+                <button type="button" class="close" ng-click="modalClose()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+
+                    <txtgrp id="item" label="Item" cdivcls="col-md-12" placeholder="Item" sclick="listItems()"
+                            maxlength="200" model="input.searchBy" required></txtgrp>
+
+                    <numgrp id="mrp" label="MRP" cdivcls="col-md-6" placeholder="MRP" ng-show="manage"
+                            maxlength="3" model="input.mrp" required negative="false"></numgrp>
+
+                    <scbtngrp id="save" label="Save" cdivcls="col-md-6" mt="mt-5" ng-show="manage"
+                              sclick="saveItem(input)" cclick="manage=false"></scbtngrp>
+
+                    <a href ng-click="manage=true" class="col-md-12 text-right" ng-hide="manage">+Add</a>
+                    
+                    <div class="col-sm-12" ng-hide="manage">
+                        <table class="table topborderless">
+                            <tbody>
+                                <tr ng-repeat="item in items">
+                                    <td width="70%">{{item.name}}</td>
+                                    <td align="right">
+                                        <div class="d-flex gap-1 justify-content-end">
+                                            <editbtngrp click="editItem(item);"></editbtngrp>
+                                            <iconbtngrp click="selectItem(item)" tooltip="Select">
+                                                <i class="fa-solid fa-check"></i>
+                                            </iconbtngrp>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

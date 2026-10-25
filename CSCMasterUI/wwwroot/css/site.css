@@ -118,6 +118,9 @@ iconbtngrp.active > button:first-child {
     color: var(--bgclr);
     background-color: var(--ribbonclr);
 }
+.highlightColor {
+    color: red
+}
 
 .text-left {
     text-align: left !important;
@@ -158,4 +161,7 @@ iconbtngrp.active > button:first-child {
     bottom: 0;
     background: #fff;
     z-index: 2;
+}
+.tableBorderLess {
+    border-style:hidden;
 }

@@ -75,7 +75,6 @@
     <div class="container-fluid page">
         <main role="main" class="pb-3">
             @RenderBody()
-            <partial name="Menu" />
         </main>
     </div>
     
@@ -95,12 +94,16 @@
     <script src="~/js/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-tpls.js"></script>
+    <script src="~/js/site.js"></script>
 
     <script src="~/AppJs/Base/App.js"></script>
     <script src="~/AppJs/Base/AppUtil.js"></script>
     <script src="~/AppJs/Base/BaseService.service.js"></script>
     <script src="~/AppJs/Base/Directives.controller.js"></script>
     <script src="~/AppJs/Base/PopupModal.service.js"></script>
+    <script src="~/AppJs/Base/Payment.controller.js"></script>
+    <script src="~/AppJs/PettyCash/ItemSelector.controller.js"></script>
+    <script src="~/AppJs/PettyCash/CustomerSelector.controller.js"></script>
 
     <script src="~/AppJs/UserAccount/NavBar.controller.js"></script>
     <script src="~/AppJs/UserAccount/UserAccount.service.js"></script>
@@ -109,6 +112,9 @@
     <script src="~/AppJs/Entrolment/UploadEntrolment.controller.js"></script>
     <script src="~/AppJs/Entrolment/EntrolmentView.controller.js"></script>
     <script src="~/AppJs/Entrolment/Entrolment.service.js"></script>
+
+    <script src="~/AppJs/PettyCash/PettyCash.controller.js"></script>
+    <script src="~/AppJs/PettyCash/PettyCash.service.js"></script>
     <script>
         const apiBaseUrl = '@Configuration["AppSettings:ApiBaseUrl"]';
     </script>

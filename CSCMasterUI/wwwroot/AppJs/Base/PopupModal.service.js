@@ -1,7 +1,9 @@
 ﻿var myModule = angular.module('app');
-myModule.service('PopupModalService', function ($compile, $rootScope) {
+myModule.service('PopupModalService', function ($compile, $rootScope, $q) {
 
     this.show = function (options) {
+
+        var deferred = $q.defer();
 
         var scope = $rootScope.$new(true);
 
@@ -70,27 +72,37 @@ myModule.service('PopupModalService', function ($compile, $rootScope) {
             modalElement.modal('hide');
         });
 
+        modalElement.on('keydown', function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                modalElement.modal('hide');
+            }
+        });
+
         modalElement.on('hidden.bs.modal', function () {
             modalElement.remove();
             scope.$destroy();
+            deferred.resolve();
         });
+
+        return deferred.promise;
     };
 
     // Helper shortcuts
     this.success = function (message) {
-        this.show({ title: "Success", message: message, type: "success" });
+        return this.show({ title: "Success", message: message, type: "success" });
     };
 
     this.error = function (message) {
-        this.show({ title: "Error", message: message, type: "error" });
+        return this.show({ title: "Error", message: message, type: "error" });
     };
 
     this.warning = function (message) {
-        this.show({ title: "Warning", message: message, type: "warning" });
+        return this.show({ title: "Warning", message: message, type: "warning" });
     };
 
     this.info = function (message) {
-        this.show({ title: "Information", message: message, type: "info" });
+        return this.show({ title: "Information", message: message, type: "info" });
     };
 
 });

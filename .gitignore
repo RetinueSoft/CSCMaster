@@ -1,2 +1,21 @@
-/.svn
-/.vs
+# Build output
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/
+PubTmp/
+TestResults/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+packages/
+
+# SVN metadata
+.svn/
+
+# Local machine settings (passwords) and Docker deployment secrets
+appsettings.Local.json
+.env
+backups/
+*.log

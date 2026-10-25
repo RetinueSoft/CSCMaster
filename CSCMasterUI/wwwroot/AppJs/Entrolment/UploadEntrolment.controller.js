@@ -14,8 +14,9 @@ function UploadEntrolmentController(binder, service, popupModal) {
         binder.input.member = {};
         service.featchMember(stationId, function (result) {
             RemoveControlError("stationId");
-            if (result == null)
+            if (result == null) {
                 SetControlError("stationId", "Station Id not match"); validationStatus = false;
+            }
             binder.input.member = result;
         });
     };

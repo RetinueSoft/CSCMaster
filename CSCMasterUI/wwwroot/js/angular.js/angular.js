@@ -3549,7 +3549,8 @@ function jqLiteInheritedData(element, name, value) {
     // If dealing with a document fragment node with a host element, and no parent, use the host
     // element as the parent. This enables directives within a Shadow DOM or polyfilled Shadow DOM
     // to lookup parent controllers.
-    element = element.parentNode || (element.nodeType === NODE_TYPE_DOCUMENT_FRAGMENT && element.host);
+    element = element.parentNode || (element.nodeType === NODE_TYPE_DOCUMENT_FRAGMENT && element
+    );
   }
 }
 
