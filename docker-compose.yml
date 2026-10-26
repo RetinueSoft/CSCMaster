@@ -49,6 +49,7 @@ services:
       BusinessTimeZone: "${BUSINESS_TIME_ZONE:-Asia/Kolkata}"
       Jwt__Key: "${JWT_KEY:?Set JWT_KEY in .env}"
       Cors__AllowedOrigins__0: "${UI_PUBLIC_URL:?Set UI_PUBLIC_URL in .env}"
+      Cors__Origins: "${CORS_ORIGINS:-}"   # other addresses the UI is opened from
       TZ: "${TZ:-UTC}"
     ports:
       - "${API_HOST_PORT:-8084}:8080"      # the server's main Caddy proxies API_PUBLIC_URL to this port
