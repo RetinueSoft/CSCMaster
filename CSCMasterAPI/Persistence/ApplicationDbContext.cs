@@ -1,4 +1,5 @@
-﻿
+﻿using CSCMasterAPI.Utils;
+
 
 using CSCMasterAPI.Persistence.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -30,17 +31,36 @@ namespace CSCMasterAPI.Persistence
 
 
 
+        public const string CaseInsensitiveCollation = "case_insensitive";
+        private bool IsPostgres => Database.IsNpgsql();
+
+        static ApplicationDbContext()
+        {
+            // PostgreSQL: SQL Server-style DateTime columns; MinValue/MaxValue as 0001-01-01/9999-12-31 (see Program.cs).
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.EnableSensitiveDataLogging();
-            optionsBuilder.LogTo(Console.WriteLine);
+            // Detailed SQL logging (including data values) only while developing.
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                optionsBuilder.EnableSensitiveDataLogging();
+                optionsBuilder.LogTo(Console.WriteLine);
+            }
         }
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties<decimal>().HavePrecision(18, 6);
+            // PostgreSQL compares text case-sensitively; match SQL Server's case-insensitive behaviour.
+            if (IsPostgres)
+                configurationBuilder.Properties<string>().UseCollation(CaseInsensitiveCollation);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            if (IsPostgres)
+                modelBuilder.HasCollation(CaseInsensitiveCollation, locale: "und-u-ks-level2", provider: "icu", deterministic: false);
             DefaultPreSetup(modelBuilder);
             UserModelCreating(modelBuilder.Entity<User>());
             DistrictModelCreating(modelBuilder.Entity<District>());
@@ -53,9 +73,13 @@ namespace CSCMasterAPI.Persistence
             PettyCashDefaultsCreating(modelBuilder.Entity<Company>(), modelBuilder.Entity<CompanyBranch>(), modelBuilder.Entity<Customer>(), modelBuilder.Entity<Item>());
 
             DbInitializeRecord(modelBuilder);
+
+            // System timestamp stored in UTC (see Utils/AppClock.cs); everything else is business time.
+            modelBuilder.Entity<Entrollment>().Property(x => x.UploadedDate).HasConversion(AppClock.UtcConverter);
         }
         private void DefaultPreSetup(ModelBuilder modelBuilder)
         {
+            if (IsPostgres) return;   // datetimeoffset(3) is a SQL Server column type
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 foreach (var property in entityType.GetProperties()

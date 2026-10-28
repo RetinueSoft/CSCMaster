@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using CSCMasterAPI.Persistence.Service;
 using CSCMasterAPI.Models;
+using CSCMasterAPI.Utils;
 using CSCMasterAPI.Persistence.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
@@ -127,14 +128,14 @@ namespace CSCMasterAPI.Controllers
         }
         private string GenerateJwtToken(Claim[] claims)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("M0MjGA3c4w6FhXpavzFwOuDchrBo9JSZ"));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings.GetKey(_config)));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 issuer: "Retinue",
                 audience: "CSCMaster",
                 claims: claims,
-                expires: DateTime.Now.AddHours(10),
+                expires: DateTime.UtcNow.AddHours(10),
                 signingCredentials: credentials
             );
 

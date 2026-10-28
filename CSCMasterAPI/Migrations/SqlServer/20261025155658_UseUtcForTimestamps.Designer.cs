@@ -9,18 +9,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CSCMasterAPI.Migrations
+namespace CSCMasterAPI.Migrations.SqlServer
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260516040804_AddPettyCashAccountTblAndDependent")]
-    partial class AddPettyCashAccountTblAndDependent
+    [Migration("20261025155658_UseUtcForTimestamps")]
+    partial class UseUtcForTimestamps
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.24")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -719,6 +719,10 @@ namespace CSCMasterAPI.Migrations
                     b.Property<int>("BranchId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CashAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
@@ -755,6 +759,10 @@ namespace CSCMasterAPI.Migrations
                     b.Property<int>("TransactionType")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("UPIAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -790,6 +798,10 @@ namespace CSCMasterAPI.Migrations
                     b.Property<decimal>("MRP")
                         .HasPrecision(18, 6)
                         .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");

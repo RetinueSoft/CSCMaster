@@ -19,13 +19,26 @@ using System.Text;
 //        rollingInterval: Serilog.RollingInterval.Day
 //    ).CreateLogger();
 
+// PostgreSQL: date columns stay "timestamp without time zone" (like SQL Server datetime2); the app decides
+// which time zone a column holds (Utils/AppClock.cs). DateTime.MinValue/MaxValue stored as 0001-01-01/9999-12-31.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+
 var builder = WebApplication.CreateBuilder(args);
+// Machine-specific settings (e.g. database password); this file is not committed.
+// Environment variables and command-line arguments are re-added so they still win over it.
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
+builder.Configuration.AddCommandLine(args);
+
+// Business time zone for "today" and business dates, independent of the server's time zone.
+AppClock.Configure(builder.Configuration["BusinessTimeZone"]);
 
 // Use Serilog for logging
 //builder.Host.UseSerilog(Log.Logger);
 
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    option.UseConfiguredDatabase(builder.Configuration)   // SQL Server or PostgreSQL ("DatabaseProvider")
 );
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -33,7 +46,14 @@ builder.Services.AddScoped<IEnrolmentService, EnrolmentService>();
 builder.Services.AddScoped<IPettyCashService, PettyCashService>();
 builder.Services.AddScoped<ILoginContext, LoginContext>();
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+// Browser addresses allowed to call the API: the Cors:AllowedOrigins list, plus Cors:Origins
+// (comma-separated, handy in an environment variable, e.g. CORS_ORIGINS in the Docker .env).
+var allowedOrigins = (builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+    .Concat((builder.Configuration["Cors:Origins"] ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    .Select(o => o.TrimEnd('/'))
+    .Where(o => o.Length > 0)
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
 
 builder.Services.AddCors(options =>
 {
@@ -54,7 +74,8 @@ builder.Services.AddControllers(options =>
         .Build();
 
     options.Filters.Add(new AuthorizeFilter(policy));
-});
+})
+.AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new BusinessDateTimeJsonConverter()));
 
 builder.Services.AddControllersWithViews(options =>
 {
@@ -96,7 +117,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-var key = "M0MjGA3c4w6FhXpavzFwOuDchrBo9JSZ"; // Use strong key in production
+var key = JwtSettings.GetKey(builder.Configuration, builder.Environment); // "Jwt:Key" / Jwt__Key
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -118,6 +139,18 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Behind the server's main Caddy (reverse proxy): use the original scheme and client IP.
+// No effect when there are no X-Forwarded-* headers.
+var forwardedHeaders = new Microsoft.AspNetCore.Builder.ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto |
+                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedHost
+};
+forwardedHeaders.KnownIPNetworks.Clear();   // the app is only reachable through the proxy
+forwardedHeaders.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeaders);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -74,7 +74,7 @@ namespace CSCMasterAPI.Controllers
 
         [HttpPost("All")]
         public IActionResult Accounts([FromBody] PettyCashGetAllModel input) =>
-               new JsonResult(new ActionResponse() { SucessValue = _pettyCashService.GetAll(input?.CustomerId, input?.FromDate, input?.ToDate, input.PageIndex, input.PageSize.Value) });
+               new JsonResult(new ActionResponse() { SucessValue = _pettyCashService.GetAll(input?.CustomerId, input?.FromDate, input?.ToDate, Math.Max(input?.PageIndex ?? 1, 1), Math.Max(input?.PageSize ?? 10, 1)) });
 
         [HttpPost("ListHeader")]
         public IActionResult ListHeader([FromBody] PettyCashGetAllModel input) =>

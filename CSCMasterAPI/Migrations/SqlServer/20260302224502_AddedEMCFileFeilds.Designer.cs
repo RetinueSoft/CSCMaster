@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CSCMasterAPI.Migrations
+namespace CSCMasterAPI.Migrations.SqlServer
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260519044525_NotesColmunAddedInPettyCaseAccITemTBL")]
-    partial class NotesColmunAddedInPettyCaseAccITemTBL
+    [Migration("20260302224502_AddedEMCFileFeilds")]
+    partial class AddedEMCFileFeilds
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,121 +24,6 @@ namespace CSCMasterAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Company", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Company");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Retinue"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "FriendsCSC"
-                        });
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.CompanyBranch", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("CompanyBranch");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CompanyId = 1,
-                            Name = "Main"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CompanyId = 2,
-                            Name = "FriendsCSC Mannai"
-                        });
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Customer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("BranchId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ContactInfoJSon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("CompanyId");
-
-                    b.ToTable("Customer");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "UNKNOWN",
-                            BranchId = 2,
-                            CompanyId = 2,
-                            ContactInfoJSon = "[{\"Type\":1,\"Number\":\"9999999999\"}]",
-                            Name = "UNKNOWN"
-                        });
-                });
 
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.District", b =>
                 {
@@ -261,33 +146,6 @@ namespace CSCMasterAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Entrollment");
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Item", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("MRP")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Item");
                 });
 
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Member", b =>
@@ -696,125 +554,6 @@ namespace CSCMasterAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.PettyCashAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BillAdustmentsJSon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("BillCharges")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("BillDiscount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<int>("BranchId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("CashAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("NetAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("PaidAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("PaymentJSon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("TotalLineAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<decimal>("TotalLineDiscount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UPIAmount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PettyCashAccount");
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.PettyCashAccountItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Discount")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MRP")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("ItemId");
-
-                    b.ToTable("PettyCashAccountItem");
-                });
-
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.User", b =>
                 {
                     b.Property<int>("Id")
@@ -826,12 +565,6 @@ namespace CSCMasterAPI.Migrations
                     b.Property<string>("Aadhaar")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("BranchId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("LoginAllowed")
                         .HasColumnType("bit");
@@ -853,31 +586,13 @@ namespace CSCMasterAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("CompanyId");
-
                     b.ToTable("User");
 
                     b.HasData(
                         new
                         {
-                            Id = 3,
-                            Aadhaar = "123456789013",
-                            BranchId = 2,
-                            CompanyId = 2,
-                            LoginAllowed = true,
-                            Name = "Frds MAU1",
-                            Password = "0228@",
-                            Phone = "9444490228",
-                            Status = true
-                        },
-                        new
-                        {
                             Id = 1,
                             Aadhaar = "123456789012",
-                            BranchId = 1,
-                            CompanyId = 1,
                             LoginAllowed = true,
                             Name = "Retinue",
                             Password = "Red@123",
@@ -888,8 +603,6 @@ namespace CSCMasterAPI.Migrations
                         {
                             Id = 2,
                             Aadhaar = "123456789013",
-                            BranchId = 2,
-                            CompanyId = 2,
                             LoginAllowed = true,
                             Name = "Karthi",
                             Password = "Karthi123",
@@ -935,21 +648,6 @@ namespace CSCMasterAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Customer", b =>
-                {
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.CompanyBranch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.Company", null)
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.Entrollment", b =>
                 {
                     b.HasOne("CSCMasterAPI.Persistence.Entity.District", null)
@@ -982,57 +680,6 @@ namespace CSCMasterAPI.Migrations
                     b.HasOne("CSCMasterAPI.Persistence.Entity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.PettyCashAccount", b =>
-                {
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.CompanyBranch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.Company", null)
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.PettyCashAccountItem", b =>
-                {
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.PettyCashAccount", null)
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.Item", null)
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CSCMasterAPI.Persistence.Entity.User", b =>
-                {
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.CompanyBranch", null)
-                        .WithMany()
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CSCMasterAPI.Persistence.Entity.Company", null)
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

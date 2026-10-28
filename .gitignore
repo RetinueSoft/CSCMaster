@@ -19,3 +19,7 @@ appsettings.Local.json
 .env
 backups/
 *.log
+# Database backups and the API exception log
+*.bak
+*.dump
+Exceptiolog.txt

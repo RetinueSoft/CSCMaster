@@ -117,7 +117,7 @@ namespace CSCMasterAPI.Controllers
                 res.AddError("Invalid file, file not uploaded.");
                 return new JsonResult(res);
             }
-            if (importModelList.Any(x => x.EID.IsNullOrEmpty()))
+            if (importModelList.Any(x => string.IsNullOrEmpty(x.EID)))
             {
                 var res = new ActionResponse();
                 res.AddError("Invalid file/file format, file not uploaded");
@@ -138,8 +138,8 @@ namespace CSCMasterAPI.Controllers
                         x.EIDDate = DateTime.ParseExact(dateTimeString, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
                     }
                 }
-                x.UploadedDate = DateTime.Now;
-                x.Type = x.Type.IsNullOrEmpty() ? (x.ChildName.IsNullOrEmpty() ? "M" : "C") : x.MANDATORY_BIO_METRIC_UPDATE_ONLY == "Yes" ? "BU" :  x.Type;
+                x.UploadedDate = DateTime.UtcNow;
+                x.Type = string.IsNullOrEmpty(x.Type) ? (string.IsNullOrEmpty(x.ChildName) ? "M" : "C") : x.MANDATORY_BIO_METRIC_UPDATE_ONLY == "Yes" ? "BU" :  x.Type;
                 return x;
             }).ToList();
             _enrolmentService.Override(memberObj.Id, reportData);

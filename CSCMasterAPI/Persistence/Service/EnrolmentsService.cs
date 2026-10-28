@@ -88,7 +88,7 @@ namespace CSCMasterAPI.Persistence.Service
                     ChildName = e.ChildName,
                     Type = e.Type,
                     Uploaded = e.Uploaded == 1,
-                    UploadedDate = DateTime.Now,
+                    UploadedDate = DateTime.UtcNow,
                     OperatorAadhaar = e.OperatorAadhaar,
                     Status = e.Status,
                     Amount = e.Type == "U" || e.Type == "BU" ?  e.AMOUNT_CHARGED_FOR_UPDATE_ENROLMENT : e.AMOUNT_CHARGED_FOR_NEW_ENROLMENT,

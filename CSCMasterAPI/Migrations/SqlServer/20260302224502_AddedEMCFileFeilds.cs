@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace CSCMasterAPI.Migrations
+namespace CSCMasterAPI.Migrations.SqlServer
 {
     /// <inheritdoc />
     public partial class AddedEMCFileFeilds : Migration
