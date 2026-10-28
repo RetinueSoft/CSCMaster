@@ -1,8 +1,8 @@
 # CSCMaster on Linux: PostgreSQL 18 + API + UI.
 # HTTPS/domains: the server's common Caddy (VpsSetup caddy/sites/cscmaster.caddy) proxies
 #   UI_PUBLIC_URL  -> 127.0.0.1:UI_HOST_PORT  (default 8085)
-#   API_PUBLIC_URL -> 127.0.0.1:API_HOST_PORT (default 8084)
-# Settings: /root/common/env/cscmaster.env (linked as .env next to this file).
+#   API_PUBLIC_URL -> 127.0.0.1:API_HOST_PORT (default 18084; public https://<server-ip>:8084)
+# Settings: /root/common/.env (shared) + /root/common/env/cscmaster.env, generated into .env next to this file.
 # On the server, update.sh downloads this file from the release branch and keeps everything up to date:
 #   sudo /root/cscmaster/update.sh
 # See DOCKER.md.
@@ -53,7 +53,7 @@ services:
       Cors__Origins: "${CORS_ORIGINS:-}"   # other addresses the UI is opened from
       TZ: "${TZ:-UTC}"
     ports:
-      - "127.0.0.1:${API_HOST_PORT:-8084}:8080"   # only the server's common Caddy reaches it (API_PUBLIC_URL)
+      - "127.0.0.1:${API_HOST_PORT:-18084}:8080"   # only the server's common Caddy reaches it (API_PUBLIC_URL)
 
   ui:
     image: ghcr.io/retinuesoft/cscmaster-ui:${APP_IMAGE_TAG:-latest}

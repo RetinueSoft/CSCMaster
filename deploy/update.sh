@@ -41,28 +41,33 @@ fetch_files "$REPO" "$RELEASE_BRANCH" \
 chmod 755 import-sqlserver.sh
 mkdir -p backups
 
-# 2. Settings: /root/common/env/cscmaster.env, linked as .env here.
+# 2. Settings: /root/common/.env (shared by all apps, e.g. POSTGRES_PASSWORD, SERVER_IP) + /root/common/env/cscmaster.env
+#    (this app). /root/cscmaster/.env is generated from both; docker compose reads it.
 ENV_FILE="$(app_env_path "$NAME")"
 link_app_env "$NAME"
-created=0
-sync_env .env.example "$ENV_FILE" || created=1
+sync_env .env.example "$ENV_FILE" || true
+load_common_env
 # JWT signing key: a random one when empty (changing it later logs everyone out).
 if [ -z "$(env_get "$ENV_FILE" JWT_KEY)" ]; then
     env_set "$ENV_FILE" JWT_KEY "$(od -An -N32 -tx1 /dev/urandom | tr -d ' \n')"
     log "generated a random JWT_KEY"
 fi
-if [ "$created" = 1 ]; then
-    echo "Fill in POSTGRES_PASSWORD (check UI_PUBLIC_URL, API_PUBLIC_URL): nano $ENV_FILE, then run $0 again."
-    exit 0
+# The API is public on https://<server-ip>:8084 (common Caddy), so it listens on 127.0.0.1:18084.
+# Settings files made from the older template (api.cscmaster.online on 8084) are moved over once.
+if [ "$(env_get "$ENV_FILE" API_HOST_PORT)" = 8084 ]; then
+    env_set "$ENV_FILE" API_HOST_PORT 18084; log "API_HOST_PORT 8084 -> 18084 (Caddy serves 8084)"
 fi
-set -a; . "$ENV_FILE"; set +a
-for v in POSTGRES_PASSWORD JWT_KEY UI_PUBLIC_URL API_PUBLIC_URL; do
+api_url="$(env_get "$ENV_FILE" API_PUBLIC_URL)"
+if [ -z "$api_url" ] || [ "$api_url" = "https://api.cscmaster.online" ]; then
+    [ -n "${SERVER_IP:-}" ] || die "SERVER_IP is empty in $COMMON_DIR/.env"
+    env_set "$ENV_FILE" API_PUBLIC_URL "https://$SERVER_IP:8084"; log "API_PUBLIC_URL = https://$SERVER_IP:8084"
+fi
+env_set "$ENV_FILE" APP_IMAGE_TAG "$TAG"      # remember the chosen build for a later "docker compose up"
+set -a; . ./.env; set +a
+[ -n "${POSTGRES_PASSWORD:-}" ] || die "POSTGRES_PASSWORD is empty: set it in $COMMON_DIR/.env (shared by all apps)"
+for v in JWT_KEY UI_PUBLIC_URL API_PUBLIC_URL; do
     [ -n "${!v:-}" ] || die "$v is empty in $ENV_FILE"
 done
-
-# Remember the chosen build, so a later "docker compose up" keeps using it.
-env_set "$ENV_FILE" APP_IMAGE_TAG "$TAG"
-export APP_IMAGE_TAG="$TAG"
 
 # 3. Images.
 log "pulling images ($TAG)"
