@@ -39,7 +39,6 @@ Folders on the server:
 ├── update.sh            keeps itself up to date from the release branch
 ├── docker-compose.yml   downloaded by update.sh
 ├── .env.example         downloaded by update.sh (template; new settings are copied into the settings file)
-├── .env                 generated from /root/common/.env + /root/common/env/cscmaster.env (do not edit)
 ├── import-sqlserver.sh  downloaded by update.sh (one-time data load, below)
 ├── backups/             SQL Server .bak files for import-sqlserver.sh
 └── .deployed_sha        commit of the running images
@@ -92,8 +91,8 @@ new site.
 | Back up first, then update | `sudo /root/cscmaster/update.sh --backup` |
 | Roll back to an earlier build | `sudo /root/cscmaster/update.sh sha-1a2b3c4` (tags: GitHub → repository → Packages); `update.sh` without a tag returns to latest |
 | Change a setting | `sudo nano /root/common/env/cscmaster.env`, then `sudo /root/cscmaster/update.sh` |
-| Logs | `cd /root/cscmaster && docker compose logs -f api ui` |
-| Stop everything | `cd /root/cscmaster && docker compose down` (data is kept in Docker volumes) |
+| Logs | `app-compose cscmaster logs -f api ui` |
+| Stop everything | `app-compose cscmaster down` (data is kept in Docker volumes) |
 | Back up now | `sudo /root/common/backup-db.sh cscmaster` |
 | Restore a backup | `sudo /root/common/restore-db.sh cscmaster <file>` (replaces the database) |
 | Connect with pgAdmin/DBeaver | SSH tunnel `ssh -N -L 15432:127.0.0.1:5435 root@<server>`, then `localhost:15432`, user `postgres` |

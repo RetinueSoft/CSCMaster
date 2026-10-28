@@ -16,7 +16,8 @@ BAK="${1:?Usage: $0 backups/<file>.bak}"
 NAME="$(basename "$BAK")"
 [ -f "backups/$NAME" ] || { echo "backups/$NAME not found"; exit 1; }
 
-set -a; . ./.env; set +a
+. /root/common/lib.sh
+load_app_env cscmaster                          # /root/common/.env + env/cscmaster.env
 DB="${POSTGRES_DB:-cscmaster}"
 TEMP=cscmaster-sqltemp
 SA_PASSWORD="Tmp$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')Aa1"   # random, only for the temporary SQL Server
@@ -54,14 +55,14 @@ MOVES=$("${SQL[@]}" -h -1 -W -s "|" -Q "SET NOCOUNT ON; RESTORE FILELISTONLY FRO
 "${SQL[@]}" -Q "RESTORE DATABASE [source] FROM DISK = N'/import/$NAME' WITH FILE = $FILE_NO, REPLACE, RECOVERY $MOVES" | tail -1
 
 echo "== Copying the data into PostgreSQL (app stopped)"
-docker compose stop api ui
+app_compose cscmaster stop api ui
 set +e
-docker compose run --rm --no-deps --entrypoint dotnet api datacopy/CSCMasterDataCopy.dll \
+app_compose cscmaster run --rm --no-deps --entrypoint dotnet api datacopy/CSCMasterDataCopy.dll \
     "Server=$TEMP;Database=source;User Id=sa;Password=$SA_PASSWORD;Encrypt=False;TrustServerCertificate=True" \
     "Host=postgres;Port=5432;Database=$DB;Username=postgres;Password=$POSTGRES_PASSWORD;Command Timeout=0"
 result=$?
 set -e
-docker compose start api ui
+app_compose cscmaster start api ui
 
 [ "$result" = 0 ] && echo "== Done: data imported, temporary SQL Server removed." \
                   || echo "== The copy reported problems (exit code $result); see the output above."
