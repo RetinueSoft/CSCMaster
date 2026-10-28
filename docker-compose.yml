@@ -1,9 +1,10 @@
 # CSCMaster on Linux: PostgreSQL 18 + API + UI.
-# HTTPS is handled by the server's main Caddy (rexl-api-backend), which proxies
-#   UI_PUBLIC_URL  -> UI_HOST_PORT  (default 8085)
-#   API_PUBLIC_URL -> API_HOST_PORT (default 8084)
-# On the server, update.sh downloads this file and keeps everything up to date:
-#   sudo ./update.sh
+# HTTPS/domains: the server's common Caddy (VpsSetup caddy/sites/cscmaster.caddy) proxies
+#   UI_PUBLIC_URL  -> 127.0.0.1:UI_HOST_PORT  (default 8085)
+#   API_PUBLIC_URL -> 127.0.0.1:API_HOST_PORT (default 8084)
+# Settings: /root/common/env/cscmaster.env (linked as .env next to this file).
+# On the server, update.sh downloads this file from the release branch and keeps everything up to date:
+#   sudo /root/cscmaster/update.sh
 # See DOCKER.md.
 
 name: cscmaster
@@ -22,7 +23,7 @@ services:
     command: ["postgres", "-c", "timezone=UTC"]
     volumes:
       - postgres-data:/var/lib/postgresql   # database files (PostgreSQL 18 image layout)
-      - ./backups:/backups                  # pg_dump backups (backup-db.sh, restore-db.sh)
+      - ./backups:/backups                  # SQL Server .bak files for import-sqlserver.sh
     ports:
       - "127.0.0.1:${POSTGRES_HOST_PORT:-5435}:5432"   # only reachable from the server itself (SSH tunnel for pgAdmin/DBeaver)
     healthcheck:
@@ -52,7 +53,7 @@ services:
       Cors__Origins: "${CORS_ORIGINS:-}"   # other addresses the UI is opened from
       TZ: "${TZ:-UTC}"
     ports:
-      - "${API_HOST_PORT:-8084}:8080"      # the server's main Caddy proxies API_PUBLIC_URL to this port
+      - "127.0.0.1:${API_HOST_PORT:-8084}:8080"   # only the server's common Caddy reaches it (API_PUBLIC_URL)
 
   ui:
     image: ghcr.io/retinuesoft/cscmaster-ui:${APP_IMAGE_TAG:-latest}
@@ -68,7 +69,7 @@ services:
       AppSettings__ApiBaseUrl: "${API_PUBLIC_URL:?Set API_PUBLIC_URL in .env}"   # the browser calls the API here
       TZ: "${TZ:-UTC}"
     ports:
-      - "${UI_HOST_PORT:-8085}:8080"       # the server's main Caddy proxies UI_PUBLIC_URL to this port
+      - "127.0.0.1:${UI_HOST_PORT:-8085}:8080"    # only the server's common Caddy reaches it (UI_PUBLIC_URL)
 
 volumes:
   postgres-data:

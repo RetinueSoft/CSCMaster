@@ -1,12 +1,12 @@
 # Builds the CSCMaster API and UI images and publishes them to GitHub Container Registry (GHCR):
 #   ghcr.io/retinuesoft/cscmaster-api:latest / :sha-<commit>
 #   ghcr.io/retinuesoft/cscmaster-ui:latest  / :sha-<commit>
-# The server then updates with deploy/update.sh.
+# The server then updates with /root/cscmaster/update.sh (deploy/update.sh).
 name: Docker images
 
 on:
   push:
-    branches: [postgres-migration]
+    branches: [release]
     paths-ignore:
       - '**.md'
       - 'deploy/**'
