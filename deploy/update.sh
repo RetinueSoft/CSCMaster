@@ -42,7 +42,7 @@ chmod 755 import-sqlserver.sh
 mkdir -p backups
 
 # 2. Settings: /root/common/.env (shared by all apps, e.g. POSTGRES_PASSWORD, SERVER_IP) + /root/common/env/cscmaster.env
-#    (this app). /root/cscmaster/.env is generated from both; docker compose reads it.
+#    (this app). docker compose reads both (app_compose); nothing is kept in /root/cscmaster.
 ENV_FILE="$(app_env_path "$NAME")"
 link_app_env "$NAME"
 sync_env .env.example "$ENV_FILE" || true
@@ -52,18 +52,20 @@ if [ -z "$(env_get "$ENV_FILE" JWT_KEY)" ]; then
     env_set "$ENV_FILE" JWT_KEY "$(od -An -N32 -tx1 /dev/urandom | tr -d ' \n')"
     log "generated a random JWT_KEY"
 fi
-# The API is public on https://<server-ip>:8084 (common Caddy), so it listens on 127.0.0.1:18084.
-# Settings files made from the older template (api.cscmaster.online on 8084) are moved over once.
-if [ "$(env_get "$ENV_FILE" API_HOST_PORT)" = 8084 ]; then
-    env_set "$ENV_FILE" API_HOST_PORT 18084; log "API_HOST_PORT 8084 -> 18084 (Caddy serves 8084)"
-fi
-api_url="$(env_get "$ENV_FILE" API_PUBLIC_URL)"
-if [ -z "$api_url" ] || [ "$api_url" = "https://api.cscmaster.online" ]; then
-    [ -n "${SERVER_IP:-}" ] || die "SERVER_IP is empty in $COMMON_DIR/.env"
-    env_set "$ENV_FILE" API_PUBLIC_URL "https://$SERVER_IP:8084"; log "API_PUBLIC_URL = https://$SERVER_IP:8084"
+# Public addresses by IP (VpsSetup PORTS.md): UI https://<server-ip>:8081, API https://<server-ip>:8181;
+# the app ports are 127.0.0.1:18081 / 18181. Filled in when empty; settings from older templates are moved once.
+[ -n "${SERVER_IP:-}" ] || die "SERVER_IP is empty in $COMMON_DIR/.env"
+case "$(env_get "$ENV_FILE" API_HOST_PORT)" in 8084|18084) env_set "$ENV_FILE" API_HOST_PORT 18181; log "API_HOST_PORT -> 18181" ;; esac
+[ "$(env_get "$ENV_FILE" UI_HOST_PORT)" = 8085 ] && { env_set "$ENV_FILE" UI_HOST_PORT 18081; log "UI_HOST_PORT -> 18081"; }
+case "$(env_get "$ENV_FILE" API_PUBLIC_URL)" in
+    ""|"https://api.cscmaster.online"|"https://$SERVER_IP:8084")
+        env_set "$ENV_FILE" API_PUBLIC_URL "https://$SERVER_IP:8181"; log "API_PUBLIC_URL = https://$SERVER_IP:8181" ;;
+esac
+if [ -z "$(env_get "$ENV_FILE" CORS_ORIGINS)" ]; then
+    env_set "$ENV_FILE" CORS_ORIGINS "https://$SERVER_IP:8081"; log "CORS_ORIGINS = https://$SERVER_IP:8081 (the UI by IP)"
 fi
 env_set "$ENV_FILE" APP_IMAGE_TAG "$TAG"      # remember the chosen build for a later "docker compose up"
-set -a; . ./.env; set +a
+load_app_env "$NAME"                          # /root/common/.env + env/cscmaster.env
 [ -n "${POSTGRES_PASSWORD:-}" ] || die "POSTGRES_PASSWORD is empty: set it in $COMMON_DIR/.env (shared by all apps)"
 for v in JWT_KEY UI_PUBLIC_URL API_PUBLIC_URL; do
     [ -n "${!v:-}" ] || die "$v is empty in $ENV_FILE"
@@ -72,21 +74,21 @@ done
 # 3. Images.
 log "pulling images ($TAG)"
 ghcr_login
-docker compose pull api ui
+app_compose "$NAME" pull api ui
 
 # 4. Database: start PostgreSQL, optional backup, migrations.
-docker compose up -d --wait postgres
+app_compose "$NAME" up -d --wait postgres
 if [ "$BACKUP" = 1 ]; then
     /root/common/backup-db.sh "$NAME" || die "backup failed; nothing was updated"
 fi
 log "applying database migrations"
-docker compose run --rm --no-deps --entrypoint ./efbundle api \
+app_compose "$NAME" run --rm --no-deps --entrypoint ./efbundle api \
     --connection "Host=postgres;Port=5432;Database=${POSTGRES_DB:-cscmaster};Username=postgres;Password=$POSTGRES_PASSWORD"
 
 # 5. Start / restart what changed.
-docker compose up -d --remove-orphans
+app_compose "$NAME" up -d --remove-orphans
 docker image prune -f >/dev/null
 
 docker inspect -f '{{index .Config.Labels "org.opencontainers.image.revision"}}' cscmaster-api > .deployed_sha 2>/dev/null || true
-docker compose ps
+app_compose "$NAME" ps
 log "$NAME is running $(docker inspect -f '{{.Config.Image}}' cscmaster-api) + ui ($(cut -c1-7 .deployed_sha))"
